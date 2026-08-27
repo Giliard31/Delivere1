@@ -2,129 +2,151 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Delivery App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Delivery Express</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#ff4757">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=180&q=80">
     
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
-        body { background-color: #f8f9fa; color: #333; display: flex; flex-direction: column; height: 100vh; }
-        header { background-color: #ff4757; color: white; padding: 15px; text-align: center; font-size: 20px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
-        .container { padding: 20px; flex: 1; overflow-y: auto; padding-bottom: 90px; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
-        input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
-        .btn { background-color: #ff4757; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: bold; margin-top: 10px; }
-        .btn:active { background-color: #e84118; }
-        .link { text-align: center; margin-top: 15px; color: #ff4757; cursor: pointer; font-size: 14px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: #f4f6f8; color: #2d3436; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        
+        /* Header Moderno */
+        header { background: #ffffff; color: #2d3436; padding: 15px 20px; text-align: center; font-size: 18px; font-weight: 700; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; box-shadow: 0 2px 4px rgba(0,0,0,0.02); z-index: 10; }
+        .header-logo { color: #ff4757; display: flex; align-items: center; gap: 6px; }
+        
+        .container { padding: 16px; flex: 1; overflow-y: auto; padding-bottom: 100px; }
+        .form-group { margin-bottom: 14px; }
+        label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 13px; color: #636e72; }
+        input, select { width: 100%; padding: 14px; border: 1px solid #dfe6e9; border-radius: 12px; font-size: 15px; background: #fff; outline: none; transition: border 0.2s; }
+        input:focus, select:focus { border-color: #ff4757; }
+        
+        .btn { background-color: #ff4757; color: white; border: none; padding: 14px; width: 100%; border-radius: 12px; font-size: 16px; cursor: pointer; font-weight: 700; margin-top: 10px; box-shadow: 0 4px 12px rgba(255, 71, 87, 0.3); transition: transform 0.1s; }
+        .btn:active { transform: scale(0.98); }
+        .link { text-align: center; margin-top: 18px; color: #ff4757; cursor: pointer; font-size: 14px; font-weight: 600; }
         .hidden { display: none !important; }
-        .produto-card, .pedido-card { background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .produto-card { display: flex; gap: 15px; align-items: center; }
-        .produto-card img { width: 80px; height: 80px; object-fit: cover; border-radius: 6px; background: #eee; }
+        
+        /* Cards Profissionais */
+        .produto-card, .pedido-card { background: white; padding: 14px; border-radius: 14px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); display: flex; gap: 14px; align-items: center; border: 1px solid #f1f2f6; }
+        .produto-card img { width: 75px; height: 75px; object-fit: cover; border-radius: 10px; background: #eee; }
         .produto-info { flex: 1; }
-        .produto-info h4 { font-size: 16px; margin-bottom: 5px; }
-        .produto-info p { color: #666; font-size: 14px; margin-bottom: 5px; }
-        .carrinho-flutuante { position: fixed; bottom: 0; left: 0; width: 100%; background: #333; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; cursor: pointer; }
+        .produto-info h4 { font-size: 15px; margin-bottom: 4px; color: #2d3436; font-weight: 700; }
+        .produto-info p { color: #ff4757; font-weight: 700; font-size: 14px; }
+        
+        .pedido-card { flex-direction: column; align-items: stretch; gap: 8px; }
+        
+        /* Carrinho Flutuante Estilo App Nativo */
+        .carrinho-flutuante { position: fixed; bottom: 20px; left: 20px; right: 20px; background: #2d3436; color: white; padding: 16px 20px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; font-weight: 700; cursor: pointer; box-shadow: 0 8px 24px rgba(0,0,0,0.2); z-index: 100; animation: bounceUp 0.3s ease; }
+        @keyframes bounceUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        /* Banner de Instalação PWA */
+        #banner-instalacao { background: linear-gradient(135deg, #ff4757, #ff6b81); color: white; padding: 12px 16px; border-radius: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(255,71,87,0.2); }
     </style>
 </head>
 <body>
 
     <header>
-        <span id="header-title">Seu Delivery</span>
-        <span id="header-carrinho" class="hidden" onclick="abrirCarrinho()" style="font-size: 14px; background: #e84118; padding: 5px 10px; border-radius: 20px;">🛒 Carrinho (0)</span>
+        <div class="header-logo">🍔 <span id="header-title">Delivery</span></div>
+        <div id="header-carrinho" class="hidden" onclick="abrirCarrinho()" style="font-size: 13px; background: #ff4757; color: white; padding: 8px 14px; border-radius: 20px; font-weight: 700; box-shadow: 0 2px 6px rgba(255,71,87,0.3);">🛒 <span id="qtd-carrinho-badge">0</span></div>
     </header>
 
     <div class="container">
         
+        <!-- BANNER DE INSTALAÇÃO DO APP -->
+        <div id="banner-instalacao" class="hidden">
+            <div>
+                <strong>Instalar Aplicativo</strong>
+                <p style="font-size: 12px; opacity: 0.9;">Tenha acesso rápido direto na tela inicial.</p>
+            </div>
+            <button id="btn-instalar" style="background: white; color: #ff4757; border: none; padding: 8px 12px; border-radius: 8px; font-weight: 700; cursor: pointer;">Instalar</button>
+        </div>
+
         <!-- TELA 1: LOGIN -->
-        <div id="tela-login">
-            <h2>Entrar no App</h2>
-            <p style="margin: 10px 0 20px 0; color: #666; font-size: 14px;">Admin: <b>adm@loja.com</b> | Senha: <b>123456</b></p>
+        <div id="tela-login" style="max-width: 400px; margin: 0 auto; padding-top: 20px;">
+            <div style="text-align: center; margin-bottom: 30px;">
+                <h1 style="font-size: 26px; color: #2d3436; margin-bottom: 8px;">Bem-vindo!</h1>
+                <p style="color: #636e72; font-size: 14px;">Faça login para continuar</p>
+            </div>
             
             <div class="form-group"><label>E-mail</label><input type="email" id="login-email" placeholder="seu@email.com"></div>
             <div class="form-group"><label>Senha</label><input type="password" id="login-senha" placeholder="Sua senha"></div>
 
             <button class="btn" onclick="fazerLogin()">Entrar</button>
-            <div class="link" onclick="mostrarTela('tela-cadastro')">Ainda não tem conta? Cadastre-se</div>
+            <div class="link" onclick="mostrarTela('tela-cadastro')">Criar nova conta</div>
         </div>
 
         <!-- TELA 2: CADASTRO DO CLIENTE -->
-        <div id="tela-cadastro" class="hidden">
-            <h2>Criar Conta</h2>
-            <p style="margin: 10px 0 20px 0; color: #666; font-size: 14px;">Preencha seus dados para entrega.</p>
+        <div id="tela-cadastro" class="hidden" style="max-width: 400px; margin: 0 auto;">
+            <h2 style="margin-bottom: 6px;">Criar Conta</h2>
+            <p style="color: #636e72; font-size: 14px; margin-bottom: 20px;">Rápido e fácil para suas entregas.</p>
             
-            <div class="form-group"><label>Primeiro Nome</label><input type="text" id="cad-nome" placeholder="Seu nome"></div>
+            <div class="form-group"><label>Primeiro Nome</label><input type="text" id="cad-nome" placeholder="Ex: Carlos"></div>
             <div class="form-group"><label>E-mail</label><input type="email" id="cad-email" placeholder="seu@email.com"></div>
             <div class="form-group"><label>Senha</label><input type="password" id="cad-senha" placeholder="Sua senha"></div>
-            <div class="form-group"><label>Endereço e Número</label><input type="text" id="cad-endereco" placeholder="Ex: Rua A, 123"></div>
+            <div class="form-group"><label>Endereço e Número</label><input type="text" id="cad-endereco" placeholder="Ex: Rua Principal, 450"></div>
             <div class="form-group"><label>Bairro</label><input type="text" id="cad-bairro" placeholder="Seu bairro"></div>
             <div class="form-group"><label>Cidade</label><input type="text" id="cad-cidade" placeholder="Sua cidade"></div>
-            <div class="form-group"><label>Ponto de Referência</label><input type="text" id="cad-ref" placeholder="Ex: Próximo à praça"></div>
+            <div class="form-group"><label>Ponto de Referência</label><input type="text" id="cad-ref" placeholder="Ex: Próximo ao mercado"></div>
 
-            <button class="btn" onclick="salvarCadastro()">Finalizar Cadastro</button>
-            <div class="link" onclick="mostrarTela('tela-login')">Já tenho uma conta</div>
+            <button class="btn" onclick="salvarCadastro()">Cadastrar</button>
+            <div class="link" onclick="mostrarTela('tela-login')">Já tenho conta</div>
         </div>
 
-        <!-- TELA 3: PAINEL DO ADMINISTRADOR (REMODELADO E LIMPO) -->
+        <!-- TELA 3: PAINEL DO ADMINISTRADOR -->
         <div id="tela-admin" class="hidden">
-            <h2>Painel do Administrador</h2>
-            <p style="margin: 5px 0 20px 0; color: #ff4757; font-weight: bold;">Gerenciamento Geral</p>
-            
-            <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 25px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                <h3 style="margin-bottom: 10px;">➕ Cadastrar Novo Produto</h3>
-                <div class="form-group"><label>Nome do Produto</label><input type="text" id="adm-nome-prod" placeholder="Ex: Coca-Cola 2L"></div>
+            <h3 style="margin-bottom: 12px; color: #2d3436;">Gerenciar Cardápio</h3>
+            <div style="background: white; padding: 16px; border-radius: 14px; margin-bottom: 24px; border: 1px solid #f1f2f6;">
+                <div class="form-group"><label>Nome do Item</label><input type="text" id="adm-nome-prod" placeholder="Ex: Batata Suprema"></div>
                 <div class="form-group"><label>Preço (R$)</label><input type="number" step="0.01" id="adm-preco-prod" placeholder="0.00"></div>
                 <div class="form-group"><label>Foto do Produto</label><input type="file" id="adm-foto-prod" accept="image/*"></div>
-                <button class="btn" onclick="adicionarProduto()">Salvar Produto no Cardápio</button>
+                <button class="btn" onclick="adicionarProduto()">Adicionar ao Cardápio</button>
             </div>
 
-            <h3 style="margin-bottom: 10px;">📋 Pedidos em Tempo Real</h3>
-            <div id="lista-pedidos-admin" style="margin-bottom: 25px;"></div>
+            <h3 style="margin-bottom: 12px; color: #2d3436;">Pedidos em Tempo Real</h3>
+            <div id="lista-pedidos-admin" style="margin-bottom: 24px;"></div>
 
-            <h3 style="margin-bottom: 10px;">🍔 Gerenciar Cardápio (Ocultar / Excluir)</h3>
+            <h3 style="margin-bottom: 12px; color: #2d3436;">Itens Cadastrados</h3>
             <div id="lista-produtos-admin"></div>
 
-            <button class="btn" style="background-color: #333; margin-top: 30px;" onclick="sair()">Sair da Conta</button>
+            <button class="btn" style="background-color: #2d3436; margin-top: 30px; box-shadow: none;" onclick="sair()">Sair da Conta</button>
         </div>
 
         <!-- TELA 4: PAINEL DO CLIENTE (VITRINE) -->
         <div id="tela-cliente" class="hidden">
-            <h2>Cardápio Disponível</h2>
-            <p style="margin: 5px 0 20px 0; color: #666; font-size: 14px;">Escolha seus itens favoritos.</p>
-            
+            <h3 style="margin-bottom: 12px; color: #2d3436;">Cardápio</h3>
             <div id="lista-produtos-cliente"></div>
             
-            <h3 style="margin: 30px 0 10px 0;">📦 Meus Pedidos Recentes</h3>
+            <h3 style="margin: 24px 0 12px 0; color: #2d3436;">Acompanhe seus Pedidos</h3>
             <div id="meus-pedidos-cliente"></div>
 
-            <button class="btn" style="background-color: #333; margin-top: 30px;" onclick="sair()">Sair da Conta</button>
+            <button class="btn" style="background-color: #2d3436; margin-top: 30px; box-shadow: none;" onclick="sair()">Sair da Conta</button>
         </div>
 
-        <!-- TELA 5: CARRINHO E FECHAMENTO -->
-        <div id="tela-carrinho" class="hidden">
-            <h2>Finalizar Pedido</h2>
-            <div id="itens-carrinho" style="margin: 15px 0;"></div>
+        <!-- TELA 5: CARRINHO -->
+        <div id="tela-carrinho" class="hidden" style="max-width: 400px; margin: 0 auto;">
+            <h2 style="margin-bottom: 16px;">Seu Carrinho</h2>
+            <div id="itens-carrinho" style="margin-bottom: 20px;"></div>
             
-            <div class="form-group" style="margin-top: 20px;">
+            <div class="form-group">
                 <label>Forma de Pagamento</label>
                 <select id="pagamento-opcao" onchange="mudarPagamento()">
                     <option value="Dinheiro">Dinheiro (Levar Troco)</option>
-                    <option value="Pix">Pix (Chave da Loja)</option>
+                    <option value="Pix">Pix</option>
                 </select>
             </div>
 
             <div id="bloco-troco" class="form-group">
                 <label>Troco para quanto?</label>
-                <input type="text" id="info-troco" placeholder="Ex: Troco para R$ 50,00">
+                <input type="text" id="info-troco" placeholder="Ex: R$ 50,00">
             </div>
 
-            <div id="bloco-pix" class="hidden" style="background: #fff3f3; padding: 15px; border-radius: 8px; border: 1px dashed #ff4757; margin-bottom: 15px;">
-                <strong>Chave Pix (Celular):</strong> (85) 99999-9999<br>
-                <span style="font-size: 13px; color: #666;">Realize o Pix e confirme o pedido abaixo.</span>
+            <div id="bloco-pix" class="hidden" style="background: #fff3f3; padding: 14px; border-radius: 12px; border: 1px dashed #ff4757; margin-bottom: 16px;">
+                <strong>Chave Pix:</strong> (85) 99999-9999<br>
+                <span style="font-size: 13px; color: #636e72;">Transfira e confirme o pedido.</span>
             </div>
 
             <button class="btn" onclick="finalizarPedidoNoApp()">Confirmar Pedido</button>
@@ -144,6 +166,26 @@
         let produtos = [];
         let carrinho = [];
         let clienteLogado = null;
+        let intervaloAtualizacao = null;
+
+        // Instalação PWA
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('banner-instalacao').classList.remove('hidden');
+        });
+
+        document.getElementById('btn-instalar').addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    document.getElementById('banner-instalacao').classList.add('hidden');
+                }
+                deferredPrompt = null;
+            }
+        });
 
         function mostrarTela(idTela) {
             ['tela-login', 'tela-cadastro', 'tela-admin', 'tela-cliente', 'tela-carrinho'].forEach(t => {
@@ -151,10 +193,20 @@
             });
             document.getElementById(idTela).classList.remove('hidden');
             
+            // Gerenciar atualizações em tempo real
+            clearInterval(intervaloAtualizacao);
+
             if(idTela === 'tela-cliente') {
                 document.getElementById('header-carrinho').classList.remove('hidden');
                 atualizarBarraCarrinho();
                 carregarCardapioCliente();
+                // Atualiza os pedidos do cliente a cada 3 segundos automaticamente
+                intervaloAtualizacao = setInterval(carregarMeusPedidosClienteSilencioso, 3000);
+            } else if(idTela === 'tela-admin') {
+                document.getElementById('header-carrinho').classList.add('hidden');
+                document.getElementById('barra-carrinho').classList.add('hidden');
+                // Atualiza o painel do adm a cada 3 segundos
+                intervaloAtualizacao = setInterval(carregarPainelAdminSilencioso, 3000);
             } else {
                 document.getElementById('header-carrinho').classList.add('hidden');
                 document.getElementById('barra-carrinho').classList.add('hidden');
@@ -175,12 +227,12 @@
                 const usuariosSalvos = JSON.parse(localStorage.getItem('delivery_usuarios')) || [];
                 const usuario = usuariosSalvos.find(u => u.email === email && u.senha === senha);
                 
-                clienteLogado = usuario || { nome: email.split('@')[0], endereco: 'Endereço Principal' };
+                clienteLogado = usuario || { nome: email.split('@')[0], email: email, endereco: 'Endereço Principal' };
                 document.getElementById('header-title').innerText = `Olá, ${clienteLogado.nome}`;
                 mostrarTela('tela-cliente');
                 await carregarCardapioCliente();
             } else {
-                alert("Dados de login incorretos.");
+                alert("Dados incorretos.");
             }
         }
 
@@ -200,7 +252,7 @@
             usuarios.push(novoCliente);
             localStorage.setItem('delivery_usuarios', JSON.stringify(usuarios));
 
-            alert("Cadastro realizado com sucesso!");
+            alert("Cadastro realizado!");
             mostrarTela('tela-login');
         }
 
@@ -214,7 +266,7 @@
                 
                 const disponiveis = produtos.filter(p => p.ativo);
                 if(disponiveis.length === 0) {
-                    container.innerHTML = '<p style="color:#666;">Nenhum produto disponível no momento.</p>';
+                    container.innerHTML = '<p style="color:#636e72; font-size:14px;">Nenhum produto disponível.</p>';
                     return;
                 }
 
@@ -226,12 +278,47 @@
                                 <h4>${p.nome}</h4>
                                 <p>R$ ${p.preco.toFixed(2)}</p>
                             </div>
-                            <button onclick="adicionarAoCarrinho(${p.id})" style="background: #ff4757; color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-weight: bold;">+</button>
+                            <button onclick="adicionarAoCarrinho(${p.id})" style="background: #ff4757; color: white; border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-weight: bold; font-size: 18px; display: flex; align-items: center; justify-content: center;">+</button>
                         </div>
                     `;
                 });
                 await carregarMeusPedidosCliente();
             } catch (e) { console.error(e); }
+        }
+
+        async function carregarMeusPedidosCliente() {
+            try {
+                const res = await fetch(`${URL_RENDER}/api/pedidos`);
+                const pedidos = await res.json();
+                const container = document.getElementById('meus-pedidos-cliente');
+                
+                // Filtra apenas pedidos do cliente logado atual
+                const meusPedidos = pedidos.filter(p => p.cliente === (clienteLogado ? clienteLogado.nome : ""));
+                
+                container.innerHTML = meusPedidos.length === 0 ? '<p style="color:#636e72; font-size:14px;">Nenhum pedido recente.</p>' : '';
+
+                meusPedidos.reverse().forEach(ped => {
+                    let corStatus = '#e1b12c';
+                    if(ped.status === 'Saiu para Entrega') corStatus = '#0984e3';
+                    if(ped.status === 'Concluído') corStatus = '#00b894';
+
+                    container.innerHTML += `
+                        <div class="pedido-card">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <span style="font-size: 12px; color: #b2bec3;">Pedido #${String(ped.id).slice(-4)}</span>
+                                <span style="color: ${corStatus}; font-weight: 700; font-size: 13px;">● ${ped.status}</span>
+                            </div>
+                            <p style="font-size: 13px; color: #636e72;">Tempo estimado: <b>${ped.tempoPreparo}</b></p>
+                            <p style="font-size: 14px; font-weight: 700; margin-top:2px;">Total: R$ ${ped.total.toFixed(2)}</p>
+                        </div>
+                    `;
+                });
+            } catch (e) { console.error(e); }
+        }
+
+        async function carregarMeusPedidosClienteSilencioso() {
+            if(document.getElementById('tela-cliente').classList.contains('hidden')) return;
+            await carregarMeusPedidosCliente();
         }
 
         async function carregarPainelAdmin() {
@@ -248,11 +335,11 @@
                             <div class="produto-info">
                                 <h4>${p.nome}</h4>
                                 <p>R$ ${p.preco.toFixed(2)}</p>
-                                <span style="font-size: 12px; color: ${p.ativo ? 'green' : 'red'}; font-weight: bold;">${p.ativo ? '● Disponível' : '● Oculto'}</span>
+                                <span style="font-size: 11px; color: ${p.ativo ? '#00b894' : '#d63031'}; font-weight: 700;">${p.ativo ? '● Disponível' : '● Oculto'}</span>
                             </div>
-                            <div style="display: flex; flex-direction: column; gap: 5px;">
-                                <button onclick="alternarStatus(${p.id}, ${!p.ativo})" style="background: #f39c12; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 11px;">${p.ativo ? 'Ocultar' : 'Exibir'}</button>
-                                <button onclick="excluirProduto(${p.id})" style="background: red; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 11px;">Excluir</button>
+                            <div style="display: flex; flex-direction: column; gap: 6px;">
+                                <button onclick="alternarStatus(${p.id}, ${!p.ativo})" style="background: #dfe6e9; color: #2d3436; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600;">${p.ativo ? 'Ocultar' : 'Exibir'}</button>
+                                <button onclick="excluirProduto(${p.id})" style="background: #ffeaa7; color: #d63031; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600;">Excluir</button>
                             </div>
                         </div>
                     `;
@@ -261,28 +348,35 @@
                 const resPed = await fetch(`${URL_RENDER}/api/pedidos`);
                 const pedidos = await resPed.json();
                 const containerPed = document.getElementById('lista-pedidos-admin');
-                containerPed.innerHTML = pedidos.length === 0 ? '<p style="color:#666;">Nenhum pedido no momento.</p>' : '';
+                containerPed.innerHTML = pedidos.length === 0 ? '<p style="color:#636e72; font-size:14px;">Nenhum pedido no momento.</p>' : '';
 
-                pedidos.forEach(ped => {
+                pedidos.reverse().forEach(ped => {
                     let itensTxt = ped.itens.map(i => `${i.qtd}x ${i.nome}`).join(', ');
                     containerPed.innerHTML += `
-                        <div class="pedido-card" style="border-left: 5px solid #ff4757;">
-                            <strong>Cliente: ${ped.cliente}</strong><br>
-                            <span style="font-size: 13px; color: #666;">Endereço: ${ped.endereco}</span><br>
-                            <p style="margin: 6px 0; font-size: 13px;"><b>Itens:</b> ${itensTxt}</p>
-                            <p style="font-size: 13px;"><b>Total:</b> R$ ${ped.total.toFixed(2)} (${ped.pagamento})</p>
-                            <p style="margin: 6px 0; color: #d63031; font-weight: bold; font-size: 13px;">Status: ${ped.status} | Tempo: ${ped.tempoPreparo}</p>
+                        <div class="pedido-card" style="border-left: 4px solid #ff4757;">
+                            <div style="display:flex; justify-content:space-between;">
+                                <strong>${ped.cliente}</strong>
+                                <span style="font-size: 12px; color: #636e72;">R$ ${ped.total.toFixed(2)} (${ped.pagamento})</span>
+                            </div>
+                            <span style="font-size: 12px; color: #636e72;">${ped.endereco}</span>
+                            <p style="font-size: 13px; margin: 4px 0;"><b>Itens:</b> ${itensTxt}</p>
+                            <p style="color: #ff4757; font-weight: 700; font-size: 12px;">Status: ${ped.status} | Tempo: ${ped.tempoPreparo}</p>
                             
-                            <div style="display: flex; gap: 5px; margin-top: 10px; flex-wrap: wrap;">
-                                <input type="text" id="tempo-${ped.id}" placeholder="Tempo (Ex: 30m)" style="padding: 6px; font-size: 12px; width: 110px;">
-                                <button onclick="atualizarPedido(${ped.id}, 'Em Preparo')" style="background: #0984e3; color: white; border: none; padding: 6px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;">Aceitar</button>
-                                <button onclick="atualizarPedido(${ped.id}, 'Saiu para Entrega')" style="background: #e1b12c; color: white; border: none; padding: 6px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;">Saiu p/ Entrega</button>
-                                <button onclick="atualizarPedido(${ped.id}, 'Concluído')" style="background: #00b894; color: white; border: none; padding: 6px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;">Concluir</button>
+                            <div style="display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap;">
+                                <input type="text" id="tempo-${ped.id}" placeholder="Tempo (Ex: 30m)" style="padding: 6px; font-size: 12px; width: 100px; height: 32px;">
+                                <button onclick="atualizarPedido(${ped.id}, 'Em Preparo')" style="background: #0984e3; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600;">Aceitar</button>
+                                <button onclick="atualizarPedido(${ped.id}, 'Saiu para Entrega')" style="background: #e1b12c; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600;">Entrega</button>
+                                <button onclick="atualizarPedido(${ped.id}, 'Concluído')" style="background: #00b894; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600;">Concluir</button>
                             </div>
                         </div>
                     `;
                 });
             } catch (e) { console.error(e); }
+        }
+
+        async function carregarPainelAdminSilencioso() {
+            if(document.getElementById('tela-admin').classList.contains('hidden')) return;
+            await carregarPainelAdmin();
         }
 
         async function adicionarProduto() {
@@ -313,7 +407,6 @@
             document.getElementById('adm-preco-prod').value = '';
             document.getElementById('adm-foto-prod').value = '';
             await carregarPainelAdmin();
-            alert("Produto cadastrado com sucesso!");
         }
 
         async function alternarStatus(id, novoStatus) {
@@ -341,7 +434,7 @@
         function atualizarBarraCarrinho() {
             const totalQtd = carrinho.reduce((acc, i) => acc + i.qtd, 0);
             const totalVal = carrinho.reduce((acc, i) => acc + (i.preco * i.qtd), 0);
-            document.getElementById('header-carrinho').innerText = `🛒 Carrinho (${totalQtd})`;
+            document.getElementById('qtd-carrinho-badge').innerText = totalQtd;
             if(totalQtd > 0) {
                 document.getElementById('barra-carrinho').classList.remove('hidden');
                 document.getElementById('total-carrinho-flutuante').innerText = `R$ ${totalVal.toFixed(2)}`;
@@ -359,9 +452,9 @@
             let total = 0;
             carrinho.forEach(i => {
                 total += i.preco * i.qtd;
-                container.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span>${i.qtd}x ${i.nome}</span><span>R$ ${(i.preco * i.qtd).toFixed(2)}</span></div>`;
+                container.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:14px;"><span><b>${i.qtd}x</b> ${i.nome}</span><span>R$ ${(i.preco * i.qtd).toFixed(2)}</span></div>`;
             });
-            container.innerHTML += `<div style="text-align:right; font-weight:bold; font-size:18px; margin-top:15px;">Total: R$ ${total.toFixed(2)}</div>`;
+            container.innerHTML += `<div style="text-align:right; font-weight:700; font-size:16px; margin-top:15px; border-top:1px solid #eee; padding-top:10px;">Total: R$ ${total.toFixed(2)}</div>`;
         }
 
         function mudarPagamento() {
@@ -377,7 +470,6 @@
 
         function voltarVitrine() {
             mostrarTela('tela-cliente');
-            carregarCardapioCliente();
         }
 
         async function finalizarPedidoNoApp() {
@@ -409,25 +501,6 @@
             }
         }
 
-        async function carregarMeusPedidosCliente() {
-            try {
-                const res = await fetch(`${URL_RENDER}/api/pedidos`);
-                const pedidos = await res.json();
-                const container = document.getElementById('meus-pedidos-cliente');
-                container.innerHTML = pedidos.length === 0 ? '<p style="color:#666;">Nenhum pedido recente.</p>' : '';
-
-                pedidos.slice(-3).reverse().forEach(ped => {
-                    container.innerHTML += `
-                        <div class="pedido-card">
-                            <p style="font-size: 14px;"><b>Status:</b> <span style="color: #ff4757; font-weight: bold;">${ped.status}</span></p>
-                            <p style="font-size: 13px; color: #666;">Tempo estimado: ${ped.tempoPreparo}</p>
-                            <p style="font-size: 14px; margin-top:4px;"><b>Total:</b> R$ ${ped.total.toFixed(2)}</p>
-                        </div>
-                    `;
-                });
-            } catch (e) { console.error(e); }
-        }
-
         async function atualizarPedido(id, novoStatus) {
             let tempo = document.getElementById(`tempo-${id}`).value || "Em andamento";
             await fetch(`${URL_RENDER}/api/pedidos/${id}`, {
@@ -438,7 +511,10 @@
             await carregarPainelAdmin();
         }
 
-        function sair() { mostrarTela('tela-login'); }
+        function sair() { 
+            clearInterval(intervaloAtualizacao);
+            mostrarTela('tela-login'); 
+        }
 
         if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
     </script>
