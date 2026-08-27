@@ -32,9 +32,475 @@
             text-align: center;
             font-size: 20px;
             font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         .container {
             padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 80px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        .btn {
+            background-color: #ff4757;
+            color: white;
+            border: none;
+            padding: 12px;
+            width: 100%;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .btn:active {
+            background-color: #e84118;
+        }
+        .link {
+            text-align: center;
+            margin-top: 15px;
+            color: #ff4757;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .hidden {
+            display: none !important;
+        }
+        /* Estilos dos Produtos e Carrinho */
+        .produto-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        .produto-card img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 6px;
+            background: #eee;
+        }
+        .produto-info {
+            flex: 1;
+        }
+        .produto-info h4 {
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+        .produto-info p {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        .carrinho-flutuante {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #333;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <span id="header-title">Seu Delivery</span>
+        <span id="header-carrinho" class="hidden" onclick="abrirCarrinho()" style="font-size: 14px; background: #e84118; padding: 5px 10px; border-radius: 20px;">🛒 Carrinho (0)</span>
+    </header>
+
+    <div class="container">
+        
+        <!-- TELA 1: LOGIN -->
+        <div id="tela-login">
+            <h2>Entrar no App</h2>
+            <p style="margin: 10px 0 20px 0; color: #666; font-size: 14px;">Informe seu e-mail e senha para continuar.</p>
+            
+            <div class="form-group">
+                <label>E-mail</label>
+                <input type="email" id="login-email" placeholder="seu@email.com">
+            </div>
+            
+            <div class="form-group">
+                <label>Senha</label>
+                <input type="password" id="login-senha" placeholder="Sua senha">
+            </div>
+
+            <button class="btn" onclick="fazerLogin()">Entrar</button>
+            <div class="link" onclick="mostrarTela('tela-cadastro')">Ainda não tem conta? Cadastre-se</div>
+            <div class="link" onclick="mostrarTela('tela-recuperar')" style="color: #666; margin-top: 8px;">Esqueci minha senha</div>
+        </div>
+
+        <!-- TELA 2: CADASTRO DO CLIENTE -->
+        <div id="tela-cadastro" class="hidden">
+            <h2>Criar Conta</h2>
+            <p style="margin: 10px 0 20px 0; color: #666; font-size: 14px;">Preencha seus dados para entrega correta.</p>
+            
+            <div class="form-group"><label>Nome Completo</label><input type="text" id="cad-nome" placeholder="Seu nome"></div>
+            <div class="form-group"><label>WhatsApp (com DDD)</label><input type="text" id="cad-zap" placeholder="(00) 00000-0000"></div>
+            <div class="form-group"><label>E-mail</label><input type="email" id="cad-email" placeholder="seu@email.com"></div>
+            <div class="form-group"><label>Senha</label><input type="password" id="cad-senha" placeholder="Crie uma senha"></div>
+            <div class="form-group"><label>Endereço (Rua e Número)</label><input type="text" id="cad-endereco" placeholder="Ex: Rua Principal, 123"></div>
+            <div class="form-group"><label>Bairro</label><input type="text" id="cad-bairro" placeholder="Seu bairro"></div>
+            <div class="form-group"><label>Ponto de Referência</label><input type="text" id="cad-ref" placeholder="Ex: Próximo ao mercado X"></div>
+
+            <button class="btn" onclick="salvarCadastro()">Finalizar Cadastro</button>
+            <div class="link" onclick="mostrarTela('tela-login')">Já tenho uma conta</div>
+        </div>
+
+        <!-- TELA 3: RECUPERAR SENHA -->
+        <div id="tela-recuperar" class="hidden">
+            <h2>Recuperar Senha</h2>
+            <p style="margin: 10px 0 20px 0; color: #666; font-size: 14px;">Digite seu e-mail para cadastrar uma nova senha.</p>
+            
+            <div class="form-group"><label>E-mail cadastrado</label><input type="email" id="rec-email" placeholder="seu@email.com"></div>
+            <div class="form-group"><label>Nova Senha</label><input type="password" id="rec-novasenha" placeholder="Digite a nova senha"></div>
+
+            <button class="btn" onclick="concluirRecuperacao()">Salvar Nova Senha</button>
+            <div class="link" onclick="mostrarTela('tela-login')">Voltar para o Login</div>
+        </div>
+
+        <!-- TELA 4: PAINEL DO ADMINISTRADOR -->
+        <div id="tela-admin" class="hidden">
+            <h2>Painel do Administrador</h2>
+            <p style="margin: 10px 0 15px 0; color: #ff4757; font-weight: bold;">Gerencie seus Produtos</p>
+            
+            <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                <h3>Adicionar Novo Produto</h3>
+                <div class="form-group" style="margin-top: 10px;"><label>Nome do Produto</label><input type="text" id="adm-nome-prod" placeholder="Ex: X-Burguer Especial"></div>
+                <div class="form-group"><label>Preço (R$)</label><input type="number" step="0.01" id="adm-preco-prod" placeholder="0.00"></div>
+                <div class="form-group">
+                    <label>Foto do Produto</label>
+                    <input type="file" id="adm-foto-prod" accept="image/*">
+                </div>
+                <button class="btn" onclick="adicionarProduto()">Cadastrar Produto</button>
+            </div>
+
+            <h3>Seus Produtos Cadastrados</h3>
+            <div id="lista-produtos-admin" style="margin-top: 10px;"></div>
+
+            <button class="btn" style="background-color: #333; margin-top: 30px;" onclick="sair()">Sair da Conta</button>
+        </div>
+
+        <!-- TELA 5: PAINEL DO CLIENTE (VITRINE) -->
+        <div id="tela-cliente" class="hidden">
+            <h2>Cardápio Disponível</h2>
+            <p style="margin: 10px 0 20px 0; color: #666; font-size: 14px;">Escolha seus itens e clique no carrinho abaixo.</p>
+            
+            <div id="lista-produtos-cliente"></div>
+
+            <button class="btn" style="background-color: #333; margin-top: 30px;" onclick="sair()">Sair da Conta</button>
+        </div>
+
+        <!-- TELA 6: CARRINHO E FECHAMENTO -->
+        <div id="tela-carrinho" class="hidden">
+            <h2>Finalizar Pedido</h2>
+            <div id="itens-carrinho" style="margin: 15px 0;"></div>
+            
+            <div class="form-group" style="margin-top: 20px;">
+                <label>Forma de Pagamento</label>
+                <select id="pagamento-opcao" onchange="mudarPagamento()">
+                    <option value="dinheiro">Dinheiro (Levar Troco)</option>
+                    <option value="pix">Pix (Chave da Loja)</option>
+                </select>
+            </div>
+
+            <div id="bloco-troco" class="form-group">
+                <label>Troco para quanto? (Deixe em branco se não precisar)</label>
+                <input type="text" id="info-troco" placeholder="Ex: Troco para R$ 50,00">
+            </div>
+
+            <div id="bloco-pix" class="hidden" style="background: #fff3f3; padding: 15px; border-radius: 8px; border: 1px dashed #ff4757; margin-bottom: 15px;">
+                <strong>Chave Pix (CNPJ/Celular):</strong> <span id="chave-pix-loja">12.345.678/0001-99</span><br>
+                <span style="font-size: 13px; color: #666;">Faça o Pix e envie o comprovante pelo WhatsApp após finalizar.</span>
+            </div>
+
+            <button class="btn" onclick="enviarPedidoWhatsApp()">Enviar Pedido no WhatsApp</button>
+            <div class="link" onclick="voltarVitrine()">Continuar Comprando</div>
+        </div>
+
+    </div>
+
+    <!-- Carrinho Flutuante para Cliente -->
+    <div id="barra-carrinho" class="hidden carrinho-flutuante" onclick="abrirCarrinho()">
+        <span>🛒 Ver Carrinho</span>
+        <span id="total-carrinho-flutuante">R$ 0,00</span>
+    </div>
+
+    <script>
+        // Banco de dados local simulado (substituído pelo Render/Backend futuramente)
+        let produtos = JSON.parse(localStorage.getItem('delivery_produtos')) || [];
+        let carrinho = [];
+
+        function mostrarTela(idTela) {
+            ['tela-login', 'tela-cadastro', 'tela-recuperar', 'tela-admin', 'tela-cliente', 'tela-carrinho'].forEach(t => {
+                document.getElementById(t).classList.add('hidden');
+            });
+            document.getElementById(idTela).classList.remove('hidden');
+            
+            // Gerencia barra flutuante do carrinho
+            if(idTela === 'tela-cliente') {
+                document.getElementById('header-carrinho').classList.remove('hidden');
+                atualizarBarraCarrinho();
+            } else {
+                document.getElementById('header-carrinho').classList.add('hidden');
+                document.getElementById('barra-carrinho').classList.add('hidden');
+            }
+        }
+
+        function fazerLogin() {
+            const email = document.getElementById('login-email').value.trim();
+            const senha = document.getElementById('login-senha').value.trim();
+
+            if(!email || !senha) return alert("Preencha todos os campos!");
+
+            if(email.startsWith("administrador@")) {
+                document.getElementById('header-title').innerText = "Painel Admin";
+                mostrarTela('tela-admin');
+                renderizarProdutosAdmin();
+            } else {
+                document.getElementById('header-title').innerText = "Seu Delivery";
+                mostrarTela('tela-cliente');
+                renderizarProdutosCliente();
+            }
+        }
+
+        function salvarCadastro() {
+            const nome = document.getElementById('cad-nome').value;
+            if(!nome) return alert("Por favor, preencha o seu nome.");
+            alert("Cadastro realizado com sucesso! Faça login.");
+            mostrarTela('tela-login');
+        }
+
+        function concluirRecuperacao() {
+            const email = document.getElementById('rec-email').value;
+            const novaSenha = document.getElementById('rec-novasenha').value;
+            if(!email || !novaSenha) return alert("Preencha todos os campos.");
+            alert("Senha alterada com sucesso! Faça login com a nova senha.");
+            mostrarTela('tela-login');
+        }
+
+        function adicionarProduto() {
+            const nome = document.getElementById('adm-nome-prod').value;
+            const preco = parseFloat(document.getElementById('adm-preco-prod').value);
+            const inputFoto = document.getElementById('adm-foto-prod');
+
+            if(!nome || isNaN(preco)) return alert("Preencha o nome e o preço corretamente.");
+
+            if(inputFoto.files && inputFoto.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    salvarNovoProdutoNoBanco(nome, preco, e.target.result, true);
+                }
+                reader.readAsDataURL(inputFoto.files[0]);
+            } else {
+                salvarNovoProdutoNoBanco(nome, preco, "", true);
+            }
+        }
+
+        function salvarNovoProdutoNoBanco(nome, preco, foto, ativo) {
+            produtos.push({ id: Date.now(), nome, preco, foto, ativo });
+            localStorage.setItem('delivery_produtos', JSON.stringify(produtos));
+            
+            document.getElementById('adm-nome-prod').value = '';
+            document.getElementById('adm-preco-prod').value = '';
+            document.getElementById('adm-foto-prod').value = '';
+            
+            renderizarProdutosAdmin();
+            alert("Produto cadastrado com sucesso!");
+        }
+
+        function renderizarProdutosAdmin() {
+            const container = document.getElementById('lista-produtos-admin');
+            container.innerHTML = '';
+            if(produtos.length === 0) {
+                container.innerHTML = '<p style="color:#666; font-size:14px;">Nenhum produto cadastrado ainda.</p>';
+                return;
+            }
+            produtos.forEach(p => {
+                container.innerHTML += `
+                    <div class="produto-card">
+                        <img src="${p.foto || 'https://via.placeholder.com/80'}" alt="Foto">
+                        <div class="produto-info">
+                            <h4>${p.nome}</h4>
+                            <p>R$ ${p.preco.toFixed(2)}</p>
+                            <span style="font-size: 12px; color: ${p.ativo ? 'green' : 'red'}; font-weight: bold;">${p.ativo ? '● Disponível' : '● Oculto'}</span>
+                        </div>
+                        <div>
+                            <button onclick="alternarStatus(${p.id})" style="padding: 6px 10px; font-size: 12px; cursor: pointer; margin-bottom: 5px; display:block;">${p.ativo ? 'Ocultar' : 'Exibir'}</button>
+                            <button onclick="excluirProduto(${p.id})" style="padding: 6px 10px; font-size: 12px; background: red; color: white; border: none; border-radius: 4px; cursor: pointer;">Excluir</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function alternarStatus(id) {
+            produtos = produtos.map(p => p.id === id ? {...p, ativo: !p.ativo} : p);
+            localStorage.setItem('delivery_produtos', JSON.stringify(produtos));
+            renderizarProdutosAdmin();
+        }
+
+        function excluirProduto(id) {
+            produtos = produtos.filter(p => p.id !== id);
+            localStorage.setItem('delivery_produtos', JSON.stringify(produtos));
+            renderizarProdutosAdmin();
+        }
+
+        function renderizarProdutosCliente() {
+            const container = document.getElementById('lista-produtos-cliente');
+            container.innerHTML = '';
+            const ativos = produtos.filter(p => p.ativo);
+            
+            if(ativos.length === 0) {
+                container.innerHTML = '<p style="color:#666; font-size:14px;">Nenhum produto disponível no momento.</p>';
+                return;
+            }
+            ativos.forEach(p => {
+                container.innerHTML += `
+                    <div class="produto-card">
+                        <img src="${p.foto || 'https://via.placeholder.com/80'}" alt="Foto">
+                        <div class="produto-info">
+                            <h4>${p.nome}</h4>
+                            <p>R$ ${p.preco.toFixed(2)}</p>
+                        </div>
+                        <button onclick="adicionarAoCarrinho(${p.id})" style="background: #ff4757; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold;">+</button>
+                    </div>
+                `;
+            });
+        }
+
+        function adicionarAoCarrinho(id) {
+            const prod = produtos.find(p => p.id === id);
+            const itemCarrinho = carrinho.find(i => i.id === id);
+            if(itemCarrinho) {
+                itemCarrinho.qtd++;
+            } else {
+                carrinho.push({...prod, qtd: 1});
+            }
+            atualizarBarraCarrinho();
+        }
+
+        function atualizarBarraCarrinho() {
+            const totalQtd = carrinho.reduce((acc, i) => acc + i.qtd, 0);
+            const totalVal = carrinho.reduce((acc, i) => acc + (i.preco * i.qtd), 0);
+            
+            document.getElementById('header-carrinho').innerText = `🛒 Carrinho (${totalQtd})`;
+            
+            if(totalQtd > 0) {
+                document.getElementById('barra-carrinho').classList.remove('hidden');
+                document.getElementById('total-carrinho-flutuante').innerText = `R$ ${totalVal.toFixed(2)}`;
+            } else {
+                document.getElementById('barra-carrinho').classList.add('hidden');
+            }
+        }
+
+        function abrirCarrinho() {
+            mostrarTela('tela-carrinho');
+            const container = document.getElementById('itens-carrinho');
+            container.innerHTML = '';
+            
+            if(carrinho.length === 0) {
+                container.innerHTML = '<p style="color:#666;">Seu carrinho está vazio.</p>';
+                return;
+            }
+
+            let total = 0;
+            carrinho.forEach(i => {
+                total += i.preco * i.qtd;
+                container.innerHTML += `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 8px;">
+                        <div>
+                            <strong>${i.nome}</strong><br>
+                            <span style="font-size: 13px; color: #666;">Qtd: ${i.qtd} x R$ ${i.preco.toFixed(2)}</span>
+                        </div>
+                        <span>R$ ${(i.preco * i.qtd).toFixed(2)}</span>
+                    </div>
+                `;
+            });
+            container.innerHTML += `<div style="text-align: right; font-size: 18px; font-weight: bold; margin-top: 15px;">Total: R$ ${total.toFixed(2)}</div>`;
+        }
+
+        function mudarPagamento() {
+            const tipo = document.getElementById('pagamento-opcao').value;
+            if(tipo === 'pix') {
+                document.getElementById('bloco-pix').classList.remove('hidden');
+                document.getElementById('bloco-troco').classList.add('hidden');
+            } else {
+                document.getElementById('bloco-pix').classList.add('hidden');
+                document.getElementById('bloco-troco').classList.remove('hidden');
+            }
+        }
+
+        function voltarVitrine() {
+            mostrarTela('tela-cliente');
+            renderizarProdutosCliente();
+        }
+
+        function enviarPedidoWhatsApp() {
+            if(carrinho.length === 0) return alert("Seu carrinho está vazio!");
+            
+            let resumo = "🛒 *NOVO PEDIDO - DELIVERY*\n\n";
+            let total = 0;
+            carrinho.forEach(i => {
+                resumo += `• ${i.qtd}x ${i.nome} - R$ ${(i.preco * i.qtd).toFixed(2)}\n`;
+                total += i.preco * i.qtd;
+            });
+            resumo += `\n*Total: R$ ${total.toFixed(2)}*\n`;
+            
+            const pagamento = document.getElementById('pagamento-opcao').value;
+            if(pagamento === 'pix') {
+                resumo += `*Forma de Pagamento:* Pix (Comprovante em anexo)\n`;
+            } else {
+                const troco = document.getElementById('info-troco').value;
+                resumo += `*Forma de Pagamento:* Dinheiro ${troco ? '(' + troco + ')' : ''}\n`;
+            }
+
+            const textoCodificado = encodeURIComponent(resumo);
+            // Substitua abaixo pelo número do WhatsApp do Administrador com DDD (Ex: 5581999999999)
+            const numeroWhatsApp = "5581999999999"; 
+            
+            window.open(`https://wa.me/${numeroWhatsApp}?text=${textoCodificado}`, '_blank');
+        }
+
+        function sair() {
+            mostrarTela('tela-login');
+        }
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js');
+        }
+    </script>
+
+</body>
+</html>            padding: 20px;
             flex: 1;
             overflow-y: auto;
         }
