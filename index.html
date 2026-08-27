@@ -14,7 +14,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
         body { background-color: #f8f9fa; color: #333; display: flex; flex-direction: column; height: 100vh; }
         header { background-color: #ff4757; color: white; padding: 15px; text-align: center; font-size: 20px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
-        .container { padding: 20px; flex: 1; overflow-y: auto; padding-bottom: 80px; }
+        .container { padding: 20px; flex: 1; overflow-y: auto; padding-bottom: 90px; }
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
         input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
@@ -27,7 +27,7 @@
         .produto-card img { width: 80px; height: 80px; object-fit: cover; border-radius: 6px; background: #eee; }
         .produto-info { flex: 1; }
         .produto-info h4 { font-size: 16px; margin-bottom: 5px; }
-        .produto-info p { color: #666; font-size: 14px; margin-bottom: 8px; }
+        .produto-info p { color: #666; font-size: 14px; margin-bottom: 5px; }
         .carrinho-flutuante { position: fixed; bottom: 0; left: 0; width: 100%; background: #333; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; cursor: pointer; }
     </style>
 </head>
@@ -43,7 +43,7 @@
         <!-- TELA 1: LOGIN -->
         <div id="tela-login">
             <h2>Entrar no App</h2>
-            <p style="margin: 10px 0 20px 0; color: #666; font-size: 14px;">Use seu e-mail e senha (Admin começa com adm).</p>
+            <p style="margin: 10px 0 20px 0; color: #666; font-size: 14px;">Admin: <b>adm@loja.com</b> | Senha: <b>123456</b></p>
             
             <div class="form-group"><label>E-mail</label><input type="email" id="login-email" placeholder="seu@email.com"></div>
             <div class="form-group"><label>Senha</label><input type="password" id="login-senha" placeholder="Sua senha"></div>
@@ -52,7 +52,7 @@
             <div class="link" onclick="mostrarTela('tela-cadastro')">Ainda não tem conta? Cadastre-se</div>
         </div>
 
-        <!-- TELA 2: CADASTRO SIMPLIFICADO DO CLIENTE -->
+        <!-- TELA 2: CADASTRO DO CLIENTE -->
         <div id="tela-cadastro" class="hidden">
             <h2>Criar Conta</h2>
             <p style="margin: 10px 0 20px 0; color: #666; font-size: 14px;">Preencha seus dados para entrega.</p>
@@ -69,24 +69,24 @@
             <div class="link" onclick="mostrarTela('tela-login')">Já tenho uma conta</div>
         </div>
 
-        <!-- TELA 3: PAINEL DO ADMINISTRADOR -->
+        <!-- TELA 3: PAINEL DO ADMINISTRADOR (REMODELADO E LIMPO) -->
         <div id="tela-admin" class="hidden">
             <h2>Painel do Administrador</h2>
-            <p style="margin: 10px 0 15px 0; color: #ff4757; font-weight: bold;">Gerencie Cardápio e Pedidos</p>
+            <p style="margin: 5px 0 20px 0; color: #ff4757; font-weight: bold;">Gerenciamento Geral</p>
             
-            <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                <h3>Adicionar Novo Produto</h3>
-                <div class="form-group" style="margin-top: 10px;"><label>Nome do Produto</label><input type="text" id="adm-nome-prod" placeholder="Ex: Pizza Margherita"></div>
+            <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 25px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                <h3 style="margin-bottom: 10px;">➕ Cadastrar Novo Produto</h3>
+                <div class="form-group"><label>Nome do Produto</label><input type="text" id="adm-nome-prod" placeholder="Ex: Coca-Cola 2L"></div>
                 <div class="form-group"><label>Preço (R$)</label><input type="number" step="0.01" id="adm-preco-prod" placeholder="0.00"></div>
                 <div class="form-group"><label>Foto do Produto</label><input type="file" id="adm-foto-prod" accept="image/*"></div>
-                <button class="btn" onclick="adicionarProduto()">Cadastrar Produto</button>
+                <button class="btn" onclick="adicionarProduto()">Salvar Produto no Cardápio</button>
             </div>
 
-            <h3>Pedidos Chegando</h3>
-            <div id="lista-pedidos-admin" style="margin-top: 10px; margin-bottom: 30px;"></div>
+            <h3 style="margin-bottom: 10px;">📋 Pedidos em Tempo Real</h3>
+            <div id="lista-pedidos-admin" style="margin-bottom: 25px;"></div>
 
-            <h3>Seus Produtos</h3>
-            <div id="lista-produtos-admin" style="margin-top: 10px;"></div>
+            <h3 style="margin-bottom: 10px;">🍔 Gerenciar Cardápio (Ocultar / Excluir)</h3>
+            <div id="lista-produtos-admin"></div>
 
             <button class="btn" style="background-color: #333; margin-top: 30px;" onclick="sair()">Sair da Conta</button>
         </div>
@@ -94,12 +94,12 @@
         <!-- TELA 4: PAINEL DO CLIENTE (VITRINE) -->
         <div id="tela-cliente" class="hidden">
             <h2>Cardápio Disponível</h2>
-            <p style="margin: 10px 0 20px 0; color: #666; font-size: 14px;">Escolha seus itens e monte seu pedido.</p>
+            <p style="margin: 5px 0 20px 0; color: #666; font-size: 14px;">Escolha seus itens favoritos.</p>
             
             <div id="lista-produtos-cliente"></div>
             
-            <h3 style="margin-top: 30px;">Acompanhar Meus Pedidos</h3>
-            <div id="meus-pedidos-cliente" style="margin-top: 10px;"></div>
+            <h3 style="margin: 30px 0 10px 0;">📦 Meus Pedidos Recentes</h3>
+            <div id="meus-pedidos-cliente"></div>
 
             <button class="btn" style="background-color: #333; margin-top: 30px;" onclick="sair()">Sair da Conta</button>
         </div>
@@ -123,11 +123,11 @@
             </div>
 
             <div id="bloco-pix" class="hidden" style="background: #fff3f3; padding: 15px; border-radius: 8px; border: 1px dashed #ff4757; margin-bottom: 15px;">
-                <strong>Chave Pix (CNPJ/Celular):</strong> 12.345.678/0001-99<br>
-                <span style="font-size: 13px; color: #666;">Faça o Pix para a chave acima para concluir.</span>
+                <strong>Chave Pix (Celular):</strong> (85) 99999-9999<br>
+                <span style="font-size: 13px; color: #666;">Realize o Pix e confirme o pedido abaixo.</span>
             </div>
 
-            <button class="btn" onclick="finalizarPedidoNoApp()">Enviar Pedido</button>
+            <button class="btn" onclick="finalizarPedidoNoApp()">Confirmar Pedido</button>
             <div class="link" onclick="voltarVitrine()">Continuar Comprando</div>
         </div>
 
@@ -154,7 +154,7 @@
             if(idTela === 'tela-cliente') {
                 document.getElementById('header-carrinho').classList.remove('hidden');
                 atualizarBarraCarrinho();
-                carregarDadosCliente();
+                carregarCardapioCliente();
             } else {
                 document.getElementById('header-carrinho').classList.add('hidden');
                 document.getElementById('barra-carrinho').classList.add('hidden');
@@ -167,8 +167,7 @@
 
             if(!email || !senha) return alert("Preencha todos os campos!");
 
-            // Admin: e-mail começa com "adm" e senha "123456"
-            if(email.startsWith("adm") && senha === "123456") {
+            if(email === "adm@loja.com" && senha === "123456") {
                 document.getElementById('header-title').innerText = "Painel Admin";
                 mostrarTela('tela-admin');
                 await carregarPainelAdmin();
@@ -176,16 +175,12 @@
                 const usuariosSalvos = JSON.parse(localStorage.getItem('delivery_usuarios')) || [];
                 const usuario = usuariosSalvos.find(u => u.email === email && u.senha === senha);
                 
-                if(usuario || email) { // Aceita login se cadastrado ou direto
-                    clienteLogado = usuario || { nome: email.split('@')[0], endereco: 'Endereço padrão' };
-                    document.getElementById('header-title').innerText = `Olá, ${clienteLogado.nome}`;
-                    mostrarTela('tela-cliente');
-                    await carregarCardapioCliente();
-                } else {
-                    alert("E-mail ou senha incorretos.");
-                }
+                clienteLogado = usuario || { nome: email.split('@')[0], endereco: 'Endereço Principal' };
+                document.getElementById('header-title').innerText = `Olá, ${clienteLogado.nome}`;
+                mostrarTela('tela-cliente');
+                await carregarCardapioCliente();
             } else {
-                alert("Senha de administrador incorreta (use 123456).");
+                alert("Dados de login incorretos.");
             }
         }
 
@@ -205,7 +200,7 @@
             usuarios.push(novoCliente);
             localStorage.setItem('delivery_usuarios', JSON.stringify(usuarios));
 
-            alert("Cadastro realizado com sucesso! Faça login.");
+            alert("Cadastro realizado com sucesso!");
             mostrarTela('tela-login');
         }
 
@@ -215,12 +210,18 @@
                 produtos = await res.json();
                 
                 const container = document.getElementById('lista-produtos-cliente');
-                container.innerHTML = produtos.length === 0 ? '<p style="color:#666;">Nenhum produto disponível.</p>' : '';
+                container.innerHTML = '';
                 
-                produtos.forEach(p => {
+                const disponiveis = produtos.filter(p => p.ativo);
+                if(disponiveis.length === 0) {
+                    container.innerHTML = '<p style="color:#666;">Nenhum produto disponível no momento.</p>';
+                    return;
+                }
+
+                disponiveis.forEach(p => {
                     container.innerHTML += `
                         <div class="produto-card">
-                            <img src="${p.foto || 'https://via.placeholder.com/80'}" alt="Foto">
+                            <img src="${p.foto}" alt="Foto">
                             <div class="produto-info">
                                 <h4>${p.nome}</h4>
                                 <p>R$ ${p.preco.toFixed(2)}</p>
@@ -243,12 +244,16 @@
                 produtos.forEach(p => {
                     containerProd.innerHTML += `
                         <div class="produto-card">
-                            <img src="${p.foto || 'https://via.placeholder.com/80'}" alt="Foto">
+                            <img src="${p.foto}" alt="Foto">
                             <div class="produto-info">
                                 <h4>${p.nome}</h4>
                                 <p>R$ ${p.preco.toFixed(2)}</p>
+                                <span style="font-size: 12px; color: ${p.ativo ? 'green' : 'red'}; font-weight: bold;">${p.ativo ? '● Disponível' : '● Oculto'}</span>
                             </div>
-                            <button onclick="excluirProduto(${p.id})" style="background: red; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer;">Excluir</button>
+                            <div style="display: flex; flex-direction: column; gap: 5px;">
+                                <button onclick="alternarStatus(${p.id}, ${!p.ativo})" style="background: #f39c12; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 11px;">${p.ativo ? 'Ocultar' : 'Exibir'}</button>
+                                <button onclick="excluirProduto(${p.id})" style="background: red; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 11px;">Excluir</button>
+                            </div>
                         </div>
                     `;
                 });
@@ -264,15 +269,15 @@
                         <div class="pedido-card" style="border-left: 5px solid #ff4757;">
                             <strong>Cliente: ${ped.cliente}</strong><br>
                             <span style="font-size: 13px; color: #666;">Endereço: ${ped.endereco}</span><br>
-                            <p style="margin: 8px 0; font-size: 14px;"><b>Itens:</b> ${itensTxt}</p>
-                            <p style="font-size: 14px;"><b>Total:</b> R$ ${ped.total.toFixed(2)} (${ped.pagamento})</p>
-                            <p style="margin: 8px 0; color: #d63031; font-weight: bold;">Status: ${ped.status} | Tempo: ${ped.tempoPreparo}</p>
+                            <p style="margin: 6px 0; font-size: 13px;"><b>Itens:</b> ${itensTxt}</p>
+                            <p style="font-size: 13px;"><b>Total:</b> R$ ${ped.total.toFixed(2)} (${ped.pagamento})</p>
+                            <p style="margin: 6px 0; color: #d63031; font-weight: bold; font-size: 13px;">Status: ${ped.status} | Tempo: ${ped.tempoPreparo}</p>
                             
-                            <div style="display: flex; gap: 5px; margin-top: 10px;">
-                                <input type="text" id="tempo-${ped.id}" placeholder="Ex: 30 min" style="padding: 6px; font-size: 13px; width: 100px;">
-                                <button onclick="atualizarPedido(${ped.id}, 'Em Preparo')" style="background: #0984e3; color: white; border: none; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 12px;">Aceitar / Tempo</button>
-                                <button onclick="atualizarPedido(${ped.id}, 'Saiu para Entrega')" style="background: #e1b12c; color: white; border: none; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 12px;">Saiu Entrega</button>
-                                <button onclick="atualizarPedido(${ped.id}, 'Concluído')" style="background: #00b894; color: white; border: none; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 12px;">Concluir</button>
+                            <div style="display: flex; gap: 5px; margin-top: 10px; flex-wrap: wrap;">
+                                <input type="text" id="tempo-${ped.id}" placeholder="Tempo (Ex: 30m)" style="padding: 6px; font-size: 12px; width: 110px;">
+                                <button onclick="atualizarPedido(${ped.id}, 'Em Preparo')" style="background: #0984e3; color: white; border: none; padding: 6px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;">Aceitar</button>
+                                <button onclick="atualizarPedido(${ped.id}, 'Saiu para Entrega')" style="background: #e1b12c; color: white; border: none; padding: 6px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;">Saiu p/ Entrega</button>
+                                <button onclick="atualizarPedido(${ped.id}, 'Concluído')" style="background: #00b894; color: white; border: none; padding: 6px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;">Concluir</button>
                             </div>
                         </div>
                     `;
@@ -294,7 +299,7 @@
                 }
                 reader.readAsDataURL(inputFoto.files[0]);
             } else {
-                await enviarProd(nome, preco, "");
+                await enviarProd(nome, preco, "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=300&q=80");
             }
         }
 
@@ -308,7 +313,16 @@
             document.getElementById('adm-preco-prod').value = '';
             document.getElementById('adm-foto-prod').value = '';
             await carregarPainelAdmin();
-            alert("Produto cadastrado!");
+            alert("Produto cadastrado com sucesso!");
+        }
+
+        async function alternarStatus(id, novoStatus) {
+            await fetch(`${URL_RENDER}/api/produtos/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ativo: novoStatus })
+            });
+            await carregarPainelAdmin();
         }
 
         async function excluirProduto(id) {
@@ -374,7 +388,7 @@
 
             const pedidoData = {
                 cliente: clienteLogado ? clienteLogado.nome : "Cliente",
-                endereco: clienteLogado ? clienteLogado.endereco : "Endereço não informado",
+                endereco: clienteLogado ? clienteLogado.endereco : "Endereço Principal",
                 itens: carrinho,
                 total: total,
                 pagamento: pagamento,
@@ -389,7 +403,7 @@
 
             const r = await res.json();
             if(r.sucesso) {
-                alert("Pedido enviado com sucesso para a loja!");
+                alert("Pedido enviado com sucesso!");
                 carrinho = [];
                 voltarVitrine();
             }
@@ -402,12 +416,12 @@
                 const container = document.getElementById('meus-pedidos-cliente');
                 container.innerHTML = pedidos.length === 0 ? '<p style="color:#666;">Nenhum pedido recente.</p>' : '';
 
-                pedidos.forEach(ped => {
+                pedidos.slice(-3).reverse().forEach(ped => {
                     container.innerHTML += `
                         <div class="pedido-card">
-                            <p style="font-size: 14px;"><b>Status:</b> <span style="color: #e1b12c; font-weight: bold;">${ped.status}</span></p>
+                            <p style="font-size: 14px;"><b>Status:</b> <span style="color: #ff4757; font-weight: bold;">${ped.status}</span></p>
                             <p style="font-size: 13px; color: #666;">Tempo estimado: ${ped.tempoPreparo}</p>
-                            <p style="font-size: 14px; margin-top:5px;"><b>Total:</b> R$ ${ped.total.toFixed(2)}</p>
+                            <p style="font-size: 14px; margin-top:4px;"><b>Total:</b> R$ ${ped.total.toFixed(2)}</p>
                         </div>
                     `;
                 });
@@ -415,7 +429,7 @@
         }
 
         async function atualizarPedido(id, novoStatus) {
-            let tempo = document.getElementById(`tempo-${id}`).value;
+            let tempo = document.getElementById(`tempo-${id}`).value || "Em andamento";
             await fetch(`${URL_RENDER}/api/pedidos/${id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
