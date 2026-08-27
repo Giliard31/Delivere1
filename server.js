@@ -2,18 +2,19 @@ const express = require('express');
 const cors = require('cors');
 
 const app = express();
-app.use(express.json({ limit: '10mb' })); // Permite receber imagens em base64
+app.use(express.json({ limit: '10mb' }));
 app.use(cors());
 
-// Banco de dados em memória temporário no servidor
+// Bancos de dados em memória do servidor
 let produtosServidor = [];
+let pedidosServidor = [];
+let usuariosServidor = [];
 
-// Rota para pegar os produtos
+// Rotas de Produtos
 app.get('/api/produtos', (req, res) => {
     res.json(produtosServidor);
 });
 
-// Rota para cadastrar um produto
 app.post('/api/produtos', (req, res) => {
     const novoProduto = {
         id: Date.now(),
@@ -26,10 +27,47 @@ app.post('/api/produtos', (req, res) => {
     res.json({ sucesso: true, produto: novoProduto });
 });
 
-// Rota para alternar status ou excluir (simplificada)
 app.delete('/api/produtos/:id', (req, res) => {
     const id = Number(req.params.id);
     produtosServidor = produtosServidor.filter(p => p.id !== id);
+    res.json({ sucesso: true });
+});
+
+// Rotas de Pedidos
+app.get('/api/pedidos', (req, res) => {
+    res.json(pedidosServidor);
+});
+
+app.post('/api/pedidos', (req, res) => {
+    const novoPedido = {
+        id: Date.now(),
+        cliente: req.body.cliente,
+        endereco: req.body.endereco,
+        itens: req.body.itens,
+        total: req.body.total,
+        pagamento: req.body.pagamento,
+        troco: req.body.troco,
+        status: 'Pendente', // Pendente, Em Preparo, Saiu para Entrega, Concluído
+        tempoPreparo: 'A definir'
+    };
+    pedidosServidor.push(novoPedido);
+    res.json({ sucesso: true, pedido: novoPedido });
+});
+
+app.put('/api/pedidos/:id', (req, res) => {
+    const id = Number(req.params.id);
+    const { status, tempoPreparo } = req.body;
+    
+    pedidosServidor = pedidosServidor.map(p => {
+        if(p.id === id) {
+            return {
+                ...p,
+                status: status || p.status,
+                tempoPreparo: tempoPreparo !== undefined ? tempoPreparo : p.tempoPreparo
+            };
+        }
+        return p;
+    });
     res.json({ sucesso: true });
 });
 
