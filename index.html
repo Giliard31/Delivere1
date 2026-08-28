@@ -30,17 +30,17 @@
         .hidden { display: none !important; }
         
         /* Abas Estilo App Nativo */
-        .abas-nav { display: flex; background: white; border-radius: 12px; padding: 6px; margin-bottom: 18px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
-        .aba-btn { flex: 1; padding: 12px; text-align: center; border: none; background: transparent; font-weight: 700; font-size: 14px; color: #636e72; border-radius: 10px; cursor: pointer; transition: 0.2s; }
+        .abas-nav { display: flex; background: white; border-radius: 12px; padding: 6px; margin-bottom: 18px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); overflow-x: auto; gap: 4px; }
+        .aba-btn { flex: 1; padding: 10px 12px; text-align: center; border: none; background: transparent; font-weight: 700; font-size: 13px; color: #636e72; border-radius: 10px; cursor: pointer; transition: 0.2s; white-space: nowrap; }
         .aba-btn.ativo { background: #ff4757; color: white; box-shadow: 0 2px 8px rgba(255,71,87,0.3); }
 
-        .produto-card, .pedido-card { background: white; padding: 16px; border-radius: 14px; margin-bottom: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); display: flex; gap: 14px; align-items: center; border: 1px solid #f1f2f6; }
+        .produto-card, .pedido-card, .cliente-card { background: white; padding: 16px; border-radius: 14px; margin-bottom: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); display: flex; gap: 14px; align-items: center; border: 1px solid #f1f2f6; }
         .produto-card img { width: 85px; height: 85px; object-fit: cover; border-radius: 10px; background: #eee; }
         .produto-info { flex: 1; }
         .produto-info h4 { font-size: 17px; margin-bottom: 6px; color: #2d3436; font-weight: 700; }
         .produto-info p { color: #ff4757; font-weight: 700; font-size: 15px; }
         
-        .pedido-card { flex-direction: column; align-items: stretch; gap: 10px; font-size: 15px; }
+        .pedido-card, .cliente-card { flex-direction: column; align-items: stretch; gap: 8px; font-size: 15px; }
         
         /* Barra Regressiva do Pedido */
         .progress-bar-container { background: #dfe6e9; border-radius: 8px; height: 10px; width: 100%; overflow: hidden; margin-top: 6px; }
@@ -72,7 +72,7 @@
         <div id="tela-login" style="max-width: 400px; margin: 0 auto; padding-top: 20px;">
             <div style="text-align: center; margin-bottom: 30px;">
                 <h1 style="font-size: 28px; color: #2d3436; margin-bottom: 8px;">Bem-vindo!</h1>
-                <p style="color: #636e72; font-size: 15px;">Faça login para continuar</p>
+                <p style="color: #636e72; font-size: 15px;">Faça login com sua conta na nuvem</p>
             </div>
             
             <div class="form-group"><label>E-mail</label><input type="email" id="login-email" placeholder="seu@email.com"></div>
@@ -85,7 +85,7 @@
         <!-- TELA 2: CADASTRO -->
         <div id="tela-cadastro" class="hidden" style="max-width: 400px; margin: 0 auto;">
             <h2 style="margin-bottom: 8px; font-size: 22px;">Criar Conta</h2>
-            <p style="color: #636e72; font-size: 15px; margin-bottom: 20px;">Preencha seus dados de entrega.</p>
+            <p style="color: #636e72; font-size: 15px; margin-bottom: 20px;">Seus dados salvos com segurança na nuvem.</p>
             
             <div class="form-group"><label>Primeiro Nome</label><input type="text" id="cad-nome" placeholder="Seu nome"></div>
             <div class="form-group"><label>E-mail</label><input type="email" id="cad-email" placeholder="seu@email.com"></div>
@@ -104,6 +104,7 @@
             <div class="abas-nav">
                 <button class="aba-btn ativo" onclick="mudarAbaAdmin('cardapio')" id="btn-aba-cardapio">Cardápio</button>
                 <button class="aba-btn" onclick="mudarAbaAdmin('pedidos')" id="btn-aba-pedidos">Pedidos</button>
+                <button class="aba-btn" onclick="mudarAbaAdmin('clientes')" id="btn-aba-clientes">Clientes</button>
                 <button class="aba-btn" onclick="mudarAbaAdmin('config')" id="btn-aba-config">Config Pix</button>
             </div>
 
@@ -127,7 +128,17 @@
                 <div id="lista-pedidos-admin"></div>
             </div>
 
-            <!-- SEÇÃO 3: CONFIG PIX ADMIN (Minimizável após salvar) -->
+            <!-- SEÇÃO 3: CLIENTES E DESCONTOS (RENDER) -->
+            <div id="secao-admin-clientes" class="hidden">
+                <div style="background: #ffffff; padding: 16px; border-radius: 14px; margin-bottom: 16px; border: 1px solid #f1f2f6; text-align: center;">
+                    <h3 style="font-size: 15px; color: #636e72;">Total de Usuários Cadastrados na Nuvem</h3>
+                    <p id="contador-usuarios-total" style="font-size: 28px; font-weight: 700; color: #ff4757; margin-top: 4px;">0</p>
+                </div>
+                <h3 style="margin-bottom: 12px; font-size: 18px;">Gerenciar Descontos Individuais</h3>
+                <div id="lista-clientes-admin"></div>
+            </div>
+
+            <!-- SEÇÃO 4: CONFIG PIX ADMIN -->
             <div id="secao-admin-config" class="hidden">
                 <h3 style="margin-bottom: 12px; font-size: 18px;">Configurar Chave Pix da Loja</h3>
                 
@@ -175,6 +186,10 @@
             <h2 style="margin-bottom: 16px; font-size: 22px;">Seu Carrinho</h2>
             <div id="itens-carrinho" style="margin-bottom: 20px;"></div>
             
+            <div id="bloco-aviso-desconto" class="hidden" style="background: #e1f5fe; color: #0277bd; padding: 12px; border-radius: 10px; margin-bottom: 16px; font-size: 14px; font-weight: bold; text-align: center;">
+                🎉 Desconto Especial Aplicado: R$ <span id="valor-desconto-aplicado">0,00</span>
+            </div>
+
             <div class="form-group">
                 <label>Forma de Pagamento</label>
                 <select id="pagamento-opcao" onchange="mudarPagamento()">
@@ -255,8 +270,8 @@
         }
 
         function mudarAbaAdmin(aba) {
-            ['secao-admin-cardapio', 'secao-admin-pedidos', 'secao-admin-config'].forEach(s => document.getElementById(s).classList.add('hidden'));
-            ['btn-aba-cardapio', 'btn-aba-pedidos', 'btn-aba-config'].forEach(b => document.getElementById(b).classList.remove('ativo'));
+            ['secao-admin-cardapio', 'secao-admin-pedidos', 'secao-admin-clientes', 'secao-admin-config'].forEach(s => document.getElementById(s).classList.add('hidden'));
+            ['btn-aba-cardapio', 'btn-aba-pedidos', 'btn-aba-clientes', 'btn-aba-config'].forEach(b => document.getElementById(b).classList.remove('ativo'));
 
             if(aba === 'cardapio') {
                 document.getElementById('secao-admin-cardapio').classList.remove('hidden');
@@ -265,6 +280,10 @@
                 document.getElementById('secao-admin-pedidos').classList.remove('hidden');
                 document.getElementById('btn-aba-pedidos').classList.add('ativo');
                 carregarPainelAdmin();
+            } else if(aba === 'clientes') {
+                document.getElementById('secao-admin-clientes').classList.remove('hidden');
+                document.getElementById('btn-aba-clientes').classList.add('ativo');
+                carregarListaClientesAdmin();
             } else if(aba === 'config') {
                 document.getElementById('secao-admin-config').classList.remove('hidden');
                 document.getElementById('btn-aba-config').classList.add('ativo');
@@ -296,22 +315,30 @@
                 document.getElementById('header-title').innerText = "Painel Admin";
                 mudarAbaAdmin('cardapio');
                 mostrarTela('tela-admin');
-                await carregarPainelAdmin();
-            } else if(!email.startsWith("adm")) {
-                const usuariosSalvos = JSON.parse(localStorage.getItem('delivery_usuarios')) || [];
-                const usuario = usuariosSalvos.find(u => u.email === email && u.senha === senha);
-                
-                clienteLogado = usuario || { nome: email.split('@')[0], email: email, endereco: 'Endereço Principal' };
-                document.getElementById('header-title').innerText = `Olá, ${clienteLogado.nome}`;
-                mudarAbaCliente('vitrine');
-                mostrarTela('tela-cliente');
-                await carregarCardapioCliente();
-            } else {
-                alert("Dados incorretos.");
+                carregarPainelAdmin();
+                return;
+            }
+
+            try {
+                const res = await fetch(`${URL_RENDER}/api/usuarios`);
+                const usuarios = await res.json();
+                const usuarioEncontrado = usuarios.find(u => u.email === email && u.senha === senha);
+
+                if(usuarioEncontrado) {
+                    clienteLogado = usuarioEncontrado;
+                    document.getElementById('header-title').innerText = `Olá, ${clienteLogado.nome}`;
+                    mudarAbaCliente('vitrine');
+                    mostrarTela('tela-cliente');
+                    carregarCardapioCliente();
+                } else {
+                    alert("E-mail não cadastrado na nuvem ou senha incorreta.");
+                }
+            } catch(e) {
+                alert("Erro ao conectar com o servidor no Render.");
             }
         }
 
-        function salvarCadastro() {
+        async function salvarCadastro() {
             const nome = document.getElementById('cad-nome').value.trim();
             const email = document.getElementById('cad-email').value.trim();
             const senha = document.getElementById('cad-senha').value.trim();
@@ -322,13 +349,75 @@
 
             if(!nome || !email || !senha || !endereco) return alert("Preencha os campos obrigatórios.");
 
-            const novoCliente = { nome, email, senha, endereco: `${endereco}, ${bairro} - ${cidade} (Ref: ${ref})` };
-            let usuarios = JSON.parse(localStorage.getItem('delivery_usuarios')) || [];
-            usuarios.push(novoCliente);
-            localStorage.setItem('delivery_usuarios', JSON.stringify(usuarios));
+            const novoCliente = { 
+                nome, 
+                email, 
+                senha, 
+                endereco: `${endereco}, ${bairro} - ${cidade} (Ref: ${ref})`,
+                desconto: 0 
+            };
 
-            alert("Cadastro realizado!");
-            mostrarTela('tela-login');
+            try {
+                const res = await fetch(`${URL_RENDER}/api/usuarios`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(novoCliente)
+                });
+                const r = await res.json();
+                if(r.sucesso) {
+                    alert("Cadastro salvo na nuvem com sucesso!");
+                    mostrarTela('tela-login');
+                } else {
+                    alert(r.erro || "Este e-mail já está cadastrado.");
+                }
+            } catch(e) {
+                alert("Erro ao salvar no Render.");
+            }
+        }
+
+        async function carregarListaClientesAdmin() {
+            try {
+                const res = await fetch(`${URL_RENDER}/api/usuarios`);
+                const usuarios = await res.json();
+                
+                document.getElementById('contador-usuarios-total').innerText = usuarios.length;
+                const container = document.getElementById('lista-clientes-admin');
+                container.innerHTML = usuarios.length === 0 ? '<p style="color:#636e72;">Nenhum cliente cadastrado.</p>' : '';
+
+                usuarios.forEach(cli => {
+                    let msgPromocao = encodeURIComponent(`Olá ${cli.nome}, temos uma promoção exclusiva esperando por você hoje no Delivery Express! Venha conferir! 🍔`);
+                    container.innerHTML += `
+                        <div class="cliente-card">
+                            <p><b>Nome:</b> ${cli.nome}</p>
+                            <p style="font-size: 14px; color: #636e72;"><b>E-mail:</b> ${cli.email}</p>
+                            <p style="font-size: 14px; color: #636e72;"><b>Endereço:</b> ${cli.endereco}</p>
+                            <p style="font-size: 14px; color: #00b894;"><b>Desconto Atual:</b> R$ ${(cli.desconto || 0).toFixed(2)}</p>
+                            
+                            <div style="display:flex; gap:8px; margin-top:8px;">
+                                <input type="number" step="0.01" id="desc-${cli.id}" placeholder="Valor R$" style="padding: 10px; font-size: 14px;">
+                                <button class="btn" style="background: #00b894; margin-top:0; padding:10px; font-size:14px;" onclick="atribuirDesconto(${cli.id})">Definir Desconto</button>
+                            </div>
+                            
+                            <a href="mailto:${cli.email}?subject=Promoção Exclusiva Delivery Express&body=${msgPromocao}" target="_blank" style="text-decoration: none;">
+                                <button class="btn" style="background: #0984e3; margin-top: 8px; padding: 10px; font-size: 14px;">✉️ Enviar Promoção por E-mail</button>
+                            </a>
+                        </div>
+                    `;
+                });
+            } catch(e) { console.error(e); }
+        }
+
+        async function atribuirDesconto(id) {
+            const val = parseFloat(document.getElementById(`desc-${id}`).value);
+            if(isNaN(val)) return alert("Digite um valor de desconto válido.");
+
+            await fetch(`${URL_RENDER}/api/usuarios/${id}/desconto`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ desconto: val })
+            });
+            alert("Desconto aplicado com sucesso para o cliente!");
+            carregarListaClientesAdmin();
         }
 
         function salvarChavePix() {
@@ -478,7 +567,7 @@
 
                 pedidos.reverse().forEach(ped => {
                     let itensTxt = ped.itens.map(i => `${i.qtd}x ${i.nome}`).join(', ');
-                    let avisoPixCopiado = ped.pixCopiado ? '<p style="color: #e1b12c; font-weight: 700; font-size: 13px;">⚠️ Cliente copiou a chave Pix (Aguardando Confirmação do Pagamento)</p>' : '';
+                    let avisoPixCopiado = ped.pixCopiado ? '<p style="color: #e1b12c; font-weight: 700; font-size: 13px;">⚠️ Cliente copiou a chave Pix (Aguardando Confirmação)</p>' : '';
 
                     containerPed.innerHTML += `
                         <div class="pedido-card" style="border-left: 5px solid #ff4757;">
@@ -576,20 +665,46 @@
             }
         }
 
-        function abrirCarrinho() {
+        async function abrirCarrinho() {
             mostrarTela('tela-carrinho');
             carregarChavePixSalva();
             window.pixCopiadoPeloUsuario = false;
+
+            // Busca dados atualizados do usuário para verificar se ganhou desconto do adm
+            try {
+                const res = await fetch(`${URL_RENDER}/api/usuarios`);
+                const usuarios = await res.json();
+                const atual = usuarios.find(u => u.email === clienteLogado.email);
+                if(atual) clienteLogado = atual;
+            } catch(e) {}
+
             const container = document.getElementById('itens-carrinho');
             container.innerHTML = '';
             if(carrinho.length === 0) return container.innerHTML = '<p>Carrinho vazio.</p>';
             
-            let total = 0;
+            let subtotal = 0;
             carrinho.forEach(i => {
-                total += i.preco * i.qtd;
+                subtotal += i.preco * i.qtd;
                 container.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:15px;"><span><b>${i.qtd}x</b> ${i.nome}</span><span>R$ ${(i.preco * i.qtd).toFixed(2)}</span></div>`;
             });
-            container.innerHTML += `<div style="text-align:right; font-weight:700; font-size:17px; margin-top:15px; border-top:1px solid #eee; padding-top:10px;">Total: R$ ${total.toFixed(2)}</div>`;
+
+            let desconto = clienteLogado.desconto || 0;
+            let totalFinal = Math.max(0, subtotal - desconto);
+
+            if(desconto > 0) {
+                document.getElementById('bloco-aviso-desconto').classList.remove('hidden');
+                document.getElementById('valor-desconto-aplicado').innerText = desconto.toFixed(2);
+            } else {
+                document.getElementById('bloco-aviso-desconto').classList.add('hidden');
+            }
+
+            container.innerHTML += `
+                <div style="margin-top:15px; border-top:1px solid #eee; padding-top:10px;">
+                    <div style="display:flex; justify-content:space-between; font-size:15px; color:#636e72;"><span>Subtotal:</span><span>R$ ${subtotal.toFixed(2)}</span></div>
+                    ${desconto > 0 ? `<div style="display:flex; justify-content:space-between; font-size:15px; color:#00b894;"><span>Desconto:</span><span>- R$ ${desconto.toFixed(2)}</span></div>` : ''}
+                    <div style="display:flex; justify-content:space-between; font-weight:700; font-size:18px; margin-top:6px;"><span>Total a Pagar:</span><span>R$ ${totalFinal.toFixed(2)}</span></div>
+                </div>
+            `;
         }
 
         function mudarPagamento() {
@@ -610,7 +725,11 @@
 
         async function finalizarPedidoNoApp() {
             if(carrinho.length === 0) return alert("Carrinho vazio!");
-            const total = carrinho.reduce((acc, i) => acc + (i.preco * i.qtd), 0);
+            
+            let subtotal = carrinho.reduce((acc, i) => acc + (i.preco * i.qtd), 0);
+            let desconto = clienteLogado.desconto || 0;
+            let totalFinal = Math.max(0, subtotal - desconto);
+
             const pagamento = document.getElementById('pagamento-opcao').value;
             const troco = document.getElementById('info-troco').value;
 
@@ -618,7 +737,7 @@
                 cliente: clienteLogado ? clienteLogado.nome : "Cliente",
                 endereco: clienteLogado ? clienteLogado.endereco : "Endereço Principal",
                 itens: carrinho,
-                total: total,
+                total: totalFinal,
                 pagamento: pagamento,
                 troco: troco || "Não precisa",
                 pixCopiado: window.pixCopiadoPeloUsuario || false,
@@ -633,6 +752,15 @@
 
             const r = await res.json();
             if(r.sucesso) {
+                // Se usou o desconto, zera o desconto dele na nuvem após o pedido
+                if(desconto > 0) {
+                    await fetch(`${URL_RENDER}/api/usuarios/${clienteLogado.id}/desconto`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ desconto: 0 })
+                    });
+                }
+
                 alert("Pedido enviado com sucesso!");
                 carrinho = [];
                 mostrarTela('tela-cliente');
