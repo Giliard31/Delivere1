@@ -41,7 +41,6 @@
         
         .pedido-card, .cliente-card { flex-direction: column; align-items: stretch; gap: 8px; font-size: 15px; }
         
-        /* ANIMAÇÃO DO MOTOBOY NA BARRA DE PROGRESSO */
         .progress-wrapper { margin-top: 10px; position: relative; }
         .motoboy-container { position: relative; width: 100%; height: 26px; margin-bottom: -4px; }
         .motoboy-icon { position: absolute; font-size: 20px; transition: left 1s linear; transform: translateX(-50%); animation: bounceMoto 0.6s infinite alternate; }
@@ -54,7 +53,6 @@
         
         #banner-instalacao { background: linear-gradient(135deg, #ff4757, #ff6b81); color: white; padding: 14px 18px; border-radius: 12px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(255,71,87,0.2); }
 
-        /* ESTILO DO MODAL DE ALERTA */
         #modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center; z-index: 9999; }
         .modal-box { background: white; width: 85%; max-width: 320px; padding: 24px; border-radius: 20px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); animation: scaleIn 0.2s ease-in-out; }
         @keyframes scaleIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
@@ -148,7 +146,7 @@
                 <div id="lista-pedidos-admin"></div>
             </div>
 
-            <!-- SEÇÃO 3: CLIENTES E DESCONTOS (RENDER) -->
+            <!-- SEÇÃO 3: CLIENTES E DESCONTOS -->
             <div id="secao-admin-clientes" class="hidden">
                 <div style="background: #ffffff; padding: 16px; border-radius: 14px; margin-bottom: 16px; border: 1px solid #f1f2f6; text-align: center;">
                     <h3 style="font-size: 15px; color: #636e72;">Total de Usuários Cadastrados na Nuvem</h3>
@@ -163,14 +161,15 @@
                 <h3 style="margin-bottom: 12px; font-size: 18px;">Configurar Chave Pix da Loja</h3>
                 
                 <div id="form-pix-admin" style="background: white; padding: 18px; border-radius: 14px; border: 1px solid #f1f2f6;">
-                    <div class="form-group"><label>Chave Pix</label><input type="text" id="adm-chave-pix" placeholder="Ex: (85) 99999-9999"></div>
+                    <div class="form-group"><label>Chave Pix</label><input type="text" id="adm-chave-pix" placeholder="Ex: (85) 99999-9999 ou e-mail"></div>
                     <div class="form-group"><label>Nome Completo do Titular</label><input type="text" id="adm-nome-pix" placeholder="Ex: João da Silva"></div>
                     <div class="form-group"><label>Banco</label><input type="text" id="adm-banco-pix" placeholder="Ex: Nubank, Caixa, Itaú"></div>
+                    <div class="form-group"><label>Cidade da Conta</label><input type="text" id="adm-cidade-pix" placeholder="Ex: Fortaleza"></div>
                     <button class="btn" onclick="salvarChavePix()">Salvar Chave Pix</button>
                 </div>
 
                 <div id="painel-pix-minimizado" class="hidden" style="background: white; padding: 16px; border-radius: 14px; border: 1px solid #f1f2f6;">
-                    <p style="color: #00b894; font-weight: 700; margin-bottom: 6px;">✓ Pix Cadastrado com Sucesso!</p>
+                    <p style="color: #00b894; font-weight: 700; margin-bottom: 6px;">✓ Pix Cadastrado na Nuvem com Sucesso!</p>
                     <p style="font-size: 14px; color: #636e72;"><b>Chave:</b> <span id="mini-chave"></span></p>
                     <p style="font-size: 14px; color: #636e72;"><b>Titular:</b> <span id="mini-nome"></span></p>
                     <p style="font-size: 14px; color: #636e72; margin-bottom: 12px;"><b>Banco:</b> <span id="mini-banco"></span></p>
@@ -214,7 +213,7 @@
                 <label>Forma de Pagamento</label>
                 <select id="pagamento-opcao" onchange="mudarPagamento()">
                     <option value="Dinheiro">Dinheiro (Levar Troco)</option>
-                    <option value="Pix">Pix</option>
+                    <option value="Pix">Pix (Com Valor Automático)</option>
                 </select>
             </div>
 
@@ -224,11 +223,11 @@
             </div>
 
             <div id="bloco-pix" class="hidden" style="background: #fff3f3; padding: 16px; border-radius: 12px; border: 1px dashed #ff4757; margin-bottom: 16px;">
-                <label style="color:#d63031; font-size: 15px;">Dados para Pagamento via Pix:</label>
+                <label style="color:#d63031; font-size: 15px;">Pagamento via Pix com Valor Embutido:</label>
                 <p style="font-size: 14px; margin-top: 6px;"><b>Chave:</b> <span id="exibe-chave"></span></p>
                 <p style="font-size: 14px;"><b>Titular:</b> <span id="exibe-nome"></span></p>
                 <p style="font-size: 14px; margin-bottom: 10px;"><b>Banco:</b> <span id="exibe-banco"></span></p>
-                <button type="button" class="btn" style="margin-top: 4px; padding: 12px; font-size: 15px;" onclick="copiarChavePix()">📋 Copiar Chave Pix</button>
+                <button type="button" class="btn" style="margin-top: 4px; padding: 12px; font-size: 15px;" onclick="copiarChavePix()">📋 Copiar Pix (Valor Exato)</button>
             </div>
 
             <button class="btn" onclick="finalizarPedidoNoApp()">Confirmar Pedido</button>
@@ -243,13 +242,14 @@
     </div>
 
     <script>
-        const URL_RENDER = "https://delivere1.onrender.com"; // Substitua pelo seu link do Render
+        const URL_RENDER = "https://delivere1.onrender.com";
 
         let produtos = [];
         let carrinho = [];
         let clienteLogado = null;
         let intervaloAtualizacao = null;
         let digitandoNoAdmin = false;
+        let pixGlobalDaLoja = {};
 
         let deferredPrompt;
         window.addEventListener('beforeinstallprompt', (e) => {
@@ -292,7 +292,7 @@
             } else if(idTela === 'tela-admin') {
                 document.getElementById('header-carrinho').classList.add('hidden');
                 document.getElementById('barra-carrinho').classList.add('hidden');
-                carregarChavePixSalva();
+                carregarChavePixServidor();
                 intervaloAtualizacao = setInterval(carregarPainelAdminSilencioso, 3000);
             } else {
                 document.getElementById('header-carrinho').classList.add('hidden');
@@ -318,7 +318,7 @@
             } else if(aba === 'config') {
                 document.getElementById('secao-admin-config').classList.remove('hidden');
                 document.getElementById('btn-aba-config').classList.add('ativo');
-                carregarChavePixSalva();
+                carregarChavePixServidor();
             }
         }
 
@@ -462,41 +462,49 @@
             carregarListaClientesAdmin();
         }
 
-        function salvarChavePix() {
+        async function salvarChavePix() {
             const chave = document.getElementById('adm-chave-pix').value.trim();
             const nome = document.getElementById('adm-nome-pix').value.trim();
             const banco = document.getElementById('adm-banco-pix').value.trim();
+            const cidade = document.getElementById('adm-cidade-pix').value.trim();
 
-            if(!chave || !nome || !banco) return mostrarAlerta("Preencha todos os campos do Pix.", "Atenção");
+            if(!chave || !nome || !banco) return mostrarAlerta("Preencha os campos principais do Pix.", "Atenção");
 
-            localStorage.setItem('delivery_chave_pix', chave);
-            localStorage.setItem('delivery_nome_pix', nome);
-            localStorage.setItem('delivery_banco_pix', banco);
-
-            carregarChavePixSalva();
-            mostrarAlerta("Chave Pix salva com sucesso!", "Sucesso");
+            try {
+                await fetch(`${URL_RENDER}/api/pix`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chave, nome, banco, cidade })
+                });
+                carregarChavePixServidor();
+                mostrarAlerta("Chave Pix salva na nuvem com sucesso para todos os usuários!", "Sucesso");
+            } catch(e) {
+                mostrarAlerta("Erro ao salvar Pix no servidor.", "Erro");
+            }
         }
 
-        function carregarChavePixSalva() {
-            const chave = localStorage.getItem('delivery_chave_pix');
-            const nome = localStorage.getItem('delivery_nome_pix');
-            const banco = localStorage.getItem('delivery_banco_pix');
+        async function carregarChavePixServidor(valorCompra = 0) {
+            try {
+                const res = await fetch(`${URL_RENDER}/api/pix?valor=${valorCompra}`);
+                const dadosPix = await res.json();
+                pixGlobalDaLoja = dadosPix;
 
-            if(chave && nome && banco) {
-                document.getElementById('form-pix-admin').classList.add('hidden');
-                document.getElementById('painel-pix-minimizado').classList.remove('hidden');
-                
-                document.getElementById('mini-chave').innerText = chave;
-                document.getElementById('mini-nome').innerText = nome;
-                document.getElementById('mini-banco').innerText = banco;
+                if(dadosPix && dadosPix.chave) {
+                    document.getElementById('form-pix-admin').classList.add('hidden');
+                    document.getElementById('painel-pix-minimizado').classList.remove('hidden');
+                    
+                    document.getElementById('mini-chave').innerText = dadosPix.chave;
+                    document.getElementById('mini-nome').innerText = dadosPix.nome;
+                    document.getElementById('mini-banco').innerText = dadosPix.banco;
 
-                document.getElementById('exibe-chave').innerText = chave;
-                document.getElementById('exibe-nome').innerText = nome;
-                document.getElementById('exibe-banco').innerText = banco;
-            } else {
-                document.getElementById('form-pix-admin').classList.remove('hidden');
-                document.getElementById('painel-pix-minimizado').classList.add('hidden');
-            }
+                    document.getElementById('exibe-chave').innerText = dadosPix.chave;
+                    document.getElementById('exibe-nome').innerText = dadosPix.nome;
+                    document.getElementById('exibe-banco').innerText = dadosPix.banco;
+                } else {
+                    document.getElementById('form-pix-admin').classList.remove('hidden');
+                    document.getElementById('painel-pix-minimizado').classList.add('hidden');
+                }
+            } catch(e) { console.error(e); }
         }
 
         function editarChavePix() {
@@ -505,10 +513,9 @@
         }
 
         function copiarChavePix() {
-            const chave = localStorage.getItem('delivery_chave_pix');
-            if(!chave) return mostrarAlerta("Chave Pix não cadastrada.", "Atenção");
-            navigator.clipboard.writeText(chave);
-            mostrarAlerta("Chave Pix copiada! Faça o pagamento no seu banco e aguarde a confirmação da loja.", "Pix Copiado");
+            if(!pixGlobalDaLoja.copiaECola) return mostrarAlerta("Chave Pix não cadastrada pela loja.", "Atenção");
+            navigator.clipboard.writeText(pixGlobalDaLoja.copiaECola);
+            mostrarAlerta("Código Pix Copia e Cola copiado com o valor exato! Cole no seu banco.", "Pix Copiado");
             window.pixCopiadoPeloUsuario = true;
         }
 
@@ -727,7 +734,6 @@
 
         async function abrirCarrinho() {
             mostrarTela('tela-carrinho');
-            carregarChavePixSalva();
             window.pixCopiadoPeloUsuario = false;
 
             try {
@@ -764,6 +770,9 @@
                     <div style="display:flex; justify-content:space-between; font-weight:700; font-size:18px; margin-top:6px;"><span>Total a Pagar:</span><span>R$ ${totalFinal.toFixed(2)}</span></div>
                 </div>
             `;
+
+            // Busca o Pix no servidor passando o valor total exato do carrinho
+            await carregarChavePixServidor(totalFinal);
         }
 
         function mudarPagamento() {
