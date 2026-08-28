@@ -1,40 +1,122 @@
 const express = require('express');
 const cors = require('cors');
+const fs = require('fs');
+const path = require('path');
 
 const app = express();
-app.use(express.json({ limit: '10mb' })); // Permite fotos e dados maiores
+app.use(express.json({ limit: '10mb' }));
 app.use(cors());
 
-// Memória do Servidor (Se preferir, você pode trocar por banco de dados depois)
-let produtos = [];
-let pedidos = [];
-let usuarios = [];
+// Caminho do arquivo Pix permanente no servidor
+const arquivoPixPath = path.join(__dirname, 'pix.json');
 
-// ================= ROTAS DE USUÁRIOS =================
+// Funções de leitura e salvamento persistente do Pix
+function lerConfigPix() {
+    try {
+        if (fs.existsSync(arquivoPixPath)) {
+            const dados = fs.readFileSync(arquivoPixPath, 'utf8');
+            return JSON.parse(dados);
+        }
+    } catch (e) {
+        console.error("Erro ao ler arquivo Pix:", e);
+    }
+    return { chave: "", nome: "", banco: "", cidade: "Brasil" };
+}
 
-// Listar todos os usuários (Usado no Login e no Painel Admin)
-app.get('/api/usuarios', (req, res) => {
-    res.json(usuarios);
+function salvarConfigPix(config) {
+    try {
+        fs.writeFileSync(arquivoPixPath, JSON.stringify(config, null, 2), 'utf8');
+        return true;
+    } catch (e) {
+        console.error("Erro ao salvar arquivo Pix:", e);
+        return false;
+    }
+}
+
+// Função padrão para gerar o Payload do Pix (Copia e Cola com valor)
+function gerarPayloadPix(chave, nome, cidade, valor) {
+    // Função simplificada/padrão de payload Pix do Banco Central
+    // Se você já tem a sua função geradora no server.js, pode manter a sua.
+    const formatarCampo = (id, valorCampo) => {
+        const tamanho = String(valorCampo.length).padStart(2, '0');
+        return `${id}${tamanho}${valorCampo}`;
+    };
+
+    const nomeFormatado = nome.substring(0, 25);
+    const cidadeFormatada = cidade.substring(0, 15);
+    const valorFormatado = Number(valor).toFixed(2);
+
+    let payload = "000201";
+    let contaInfo = formatarCampo("00", "BR.GOV.BCB.PIX") + formatarCampo("01", chave);
+    payload += formatarCampo("26", contaInfo);
+    payload += "52040000"; // MCC
+    payload += "5303986";  // Moeda BRL
+    if (valor > 0) {
+        payload += formatarCampo("54", valorFormatado);
+    }
+    payload += "5802BR";
+    payload += formatarCampo("59", nomeFormatado);
+    payload += formatarCampo("60", cidadeFormatada);
+    payload += "62070503***";
+    payload += "6304"; // CRC16 placeholder
+
+    return payload;
+}
+
+// --- ROTAS DO PIX ---
+
+// Salvar Chave Pix (Admin)
+app.post('/api/pix', (req, res) => {
+    const { chave, nome, banco, cidade } = req.body;
+    
+    if (!chave) {
+        return res.status(400).json({ sucesso: false, erro: "Chave Pix obrigatória." });
+    }
+
+    const novaConfig = {
+        chave: chave.trim(),
+        nome: nome ? nome.trim() : "Loja",
+        banco: banco ? banco.trim() : "",
+        cidade: cidade ? cidade.trim() : "Brasil"
+    };
+
+    const salvo = salvarConfigPix(novaConfig);
+    if (salvo) {
+        console.log("-> PIX SALVO COM SUCESSO NO SERVIDOR:", novaConfig);
+        res.json({ sucesso: true });
+    } else {
+        res.status(500).json({ sucesso: false, erro: "Erro ao salvar arquivo Pix." });
+    }
 });
 
-// Cadastrar novo usuário (POST)
-app.post('/api/usuarios', (req, res) => {
-    const { nome, email, senha, endereco, desconto } = req.body;
-    
-    if (!email || !senha || !nome) {
-        return res.status(400).json({ sucesso: false, erro: "Preencha todos os campos obrigatórios." });
+// Consultar Chave Pix (Cliente / Admin) com valor embutido
+app.get('/api/pix', (req, res) => {
+    const valorCompra = parseFloat(req.query.valor) || 0;
+    const config = lerConfigPix();
+
+    if (!config.chave) {
+        return res.json({ chave: "", nome: "", banco: "", cidade: "", copiaECola: "" });
     }
 
-    // Verifica se já existe o e-mail cadastrado
-    const existe = usuarios.some(u => u.email.toLowerCase() === email.toLowerCase());
-    if (existe) {
-        return res.status(400).json({ sucesso: false, erro: "Este e-mail já está cadastrado!" });
-    }
+    const copiaEColaComValor = gerarPayloadPix(
+        config.chave,
+        config.nome,
+        config.cidade || "Brasil",
+        valorCompra
+    );
 
-    const novoUsuario = {
-        id: Date.now(),
-        nome,
-        email: email.toLowerCase(),
+    res.json({
+        ...config,
+        copiaECola: copiaEColaComValor
+    });
+});
+
+// (Mantenha aqui embaixo as suas outras rotas de produtos, usuários e pedidos que você já usa no projeto)
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Servidor rodando na porta ${PORT}`);
+});        email: email.toLowerCase(),
         senha,
         endereco: endereco || "Endereço não informado",
         desconto: desconto || 0
