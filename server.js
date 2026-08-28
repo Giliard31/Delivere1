@@ -142,3 +142,21 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}`);
 });
+// Variável para guardar o Pix na memória/servidor
+let configuracaoPix = {
+    chave: "",
+    nome: "",
+    banco: ""
+};
+
+// Rota para buscar o Pix
+app.get('/api/pix', (req, res) => {
+    res.json(configuracaoPix);
+});
+
+// Rota para salvar o Pix
+app.post('/api/pix', (req, res) => {
+    const { chave, nome, banco } = req.body;
+    configuracaoPix = { chave, nome, banco };
+    res.json({ sucesso: true });
+});
