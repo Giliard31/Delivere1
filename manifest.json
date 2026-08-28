@@ -1,8 +1,8 @@
 {
   "name": "Delivery Express",
   "short_name": "Delivery",
-  "start_url": "./index.html",
-  "scope": "./",
+  "start_url": "https://giliard31.github.io/Delivere1/",
+  "scope": "https://giliard31.github.io/Delivere1/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#ff4757",
