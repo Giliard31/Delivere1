@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Delivery Express</title>
     
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ff4757">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=180&q=80">
+    
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: #f4f6f8; color: #2d3436; display: flex; flex-direction: column; height: 100vh; overflow: hidden; font-size: 16px; }
@@ -34,11 +40,22 @@
         .produto-info p { color: #ff4757; font-weight: 700; font-size: 15px; }
         
         .pedido-card, .cliente-card { flex-direction: column; align-items: stretch; gap: 8px; font-size: 15px; }
+        
+        .progress-wrapper { margin-top: 10px; position: relative; }
+        .motoboy-container { position: relative; width: 100%; height: 26px; margin-bottom: -4px; }
+        .motoboy-icon { position: absolute; font-size: 20px; transition: left 1s linear; transform: translateX(-50%); animation: bounceMoto 0.6s infinite alternate; }
+        @keyframes bounceMoto { from { transform: translateX(-50%) translateY(0); } to { transform: translateX(-50%) translateY(-3px); } }
+
+        .progress-bar-container { background: #dfe6e9; border-radius: 8px; height: 10px; width: 100%; overflow: hidden; }
+        .progress-bar-fill { background: #00b894; height: 100%; width: 100%; transition: width 1s linear; }
 
         .carrinho-flutuante { position: fixed; bottom: 20px; left: 20px; right: 20px; background: #2d3436; color: white; padding: 16px 22px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 17px; cursor: pointer; box-shadow: 0 8px 24px rgba(0,0,0,0.2); z-index: 100; }
+        
+        #banner-instalacao { background: linear-gradient(135deg, #ff4757, #ff6b81); color: white; padding: 14px 18px; border-radius: 12px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(255,71,87,0.2); }
 
         #modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center; z-index: 9999; }
-        .modal-box { background: white; width: 85%; max-width: 320px; padding: 24px; border-radius: 20px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .modal-box { background: white; width: 85%; max-width: 320px; padding: 24px; border-radius: 20px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); animation: scaleIn 0.2s ease-in-out; }
+        @keyframes scaleIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         .modal-box h3 { font-size: 19px; margin-bottom: 8px; color: #2d3436; font-weight: 700; }
         .modal-box p { font-size: 15px; color: #636e72; margin-bottom: 20px; line-height: 1.4; }
         .modal-btn { background: #ff4757; color: white; border: none; padding: 12px; width: 100%; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; }
@@ -61,11 +78,19 @@
 
     <div class="container">
         
+        <div id="banner-instalacao" class="hidden">
+            <div>
+                <strong>Instalar Aplicativo</strong>
+                <p style="font-size: 13px; opacity: 0.9;">Acesse direto da tela inicial.</p>
+            </div>
+            <button id="btn-instalar" style="background: white; color: #ff4757; border: none; padding: 8px 14px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 14px;">Instalar</button>
+        </div>
+
         <!-- TELA 1: LOGIN -->
         <div id="tela-login" style="max-width: 400px; margin: 0 auto; padding-top: 20px;">
             <div style="text-align: center; margin-bottom: 30px;">
                 <h1 style="font-size: 28px; color: #2d3436; margin-bottom: 8px;">Bem-vindo!</h1>
-                <p style="color: #636e72; font-size: 15px;">Faça login com sua conta</p>
+                <p style="color: #636e72; font-size: 15px;">Faça login com sua conta na nuvem</p>
             </div>
             
             <div class="form-group"><label>E-mail</label><input type="email" id="login-email" placeholder="seu@email.com"></div>
@@ -78,6 +103,7 @@
         <!-- TELA 2: CADASTRO -->
         <div id="tela-cadastro" class="hidden" style="max-width: 400px; margin: 0 auto;">
             <h2 style="margin-bottom: 8px; font-size: 22px;">Criar Conta</h2>
+            <p style="color: #636e72; font-size: 15px; margin-bottom: 20px;">Seus dados salvos com segurança na nuvem.</p>
             
             <div class="form-group"><label>Primeiro Nome</label><input type="text" id="cad-nome" placeholder="Seu nome"></div>
             <div class="form-group"><label>E-mail</label><input type="email" id="cad-email" placeholder="seu@email.com"></div>
@@ -85,6 +111,7 @@
             <div class="form-group"><label>Endereço e Número</label><input type="text" id="cad-endereco" placeholder="Ex: Rua A, 123"></div>
             <div class="form-group"><label>Bairro</label><input type="text" id="cad-bairro" placeholder="Seu bairro"></div>
             <div class="form-group"><label>Cidade</label><input type="text" id="cad-cidade" placeholder="Sua cidade"></div>
+            <div class="form-group"><label>Ponto de Referência</label><input type="text" id="cad-ref" placeholder="Ex: Próximo à praça"></div>
 
             <button class="btn" onclick="salvarCadastro()">Cadastrar</button>
             <div class="link" onclick="mostrarTela('tela-login')">Já tenho conta</div>
@@ -95,6 +122,7 @@
             <div class="abas-nav">
                 <button class="aba-btn ativo" onclick="mudarAbaAdmin('cardapio')" id="btn-aba-cardapio">Cardápio</button>
                 <button class="aba-btn" onclick="mudarAbaAdmin('pedidos')" id="btn-aba-pedidos">Pedidos</button>
+                <button class="aba-btn" onclick="mudarAbaAdmin('clientes')" id="btn-aba-clientes">Clientes</button>
                 <button class="aba-btn" onclick="mudarAbaAdmin('config')" id="btn-aba-config">Config Pix</button>
             </div>
 
@@ -104,26 +132,39 @@
                 <div style="background: white; padding: 18px; border-radius: 14px; margin-bottom: 24px; border: 1px solid #f1f2f6;">
                     <div class="form-group"><label>Nome do Item</label><input type="text" id="adm-nome-prod" placeholder="Ex: Pizza"></div>
                     <div class="form-group"><label>Preço (R$)</label><input type="number" step="0.01" id="adm-preco-prod" placeholder="0.00"></div>
-                    <div class="form-group"><label>Foto (Link ou arquivo)</label><input type="text" id="adm-foto-prod" placeholder="https://..."></div>
+                    <div class="form-group"><label>Foto</label><input type="file" id="adm-foto-prod" accept="image/*"></div>
                     <button class="btn" onclick="adicionarProduto()">Adicionar Produto</button>
                 </div>
+
+                <h3 style="margin-bottom: 12px; font-size: 18px;">Itens Cadastrados</h3>
                 <div id="lista-produtos-admin"></div>
             </div>
 
             <!-- SEÇÃO 2: PEDIDOS ADMIN -->
             <div id="secao-admin-pedidos" class="hidden">
+                <h3 style="margin-bottom: 12px; font-size: 18px;">Gerenciar Pedidos</h3>
                 <div id="lista-pedidos-admin"></div>
             </div>
 
-            <!-- SEÇÃO 3: CONFIG PIX ADMIN -->
+            <!-- SEÇÃO 3: CLIENTES E DESCONTOS -->
+            <div id="secao-admin-clientes" class="hidden">
+                <div style="background: #ffffff; padding: 16px; border-radius: 14px; margin-bottom: 16px; border: 1px solid #f1f2f6; text-align: center;">
+                    <h3 style="font-size: 15px; color: #636e72;">Total de Usuários Cadastrados na Nuvem</h3>
+                    <p id="contador-usuarios-total" style="font-size: 28px; font-weight: 700; color: #ff4757; margin-top: 4px;">0</p>
+                </div>
+                <h3 style="margin-bottom: 12px; font-size: 18px;">Gerenciar Descontos Individuais</h3>
+                <div id="lista-clientes-admin"></div>
+            </div>
+
+            <!-- SEÇÃO 4: CONFIG PIX ADMIN -->
             <div id="secao-admin-config" class="hidden">
                 <h3 style="margin-bottom: 12px; font-size: 18px;">Configurar Chave Pix da Loja</h3>
                 
                 <div id="form-pix-admin" style="background: white; padding: 18px; border-radius: 14px; border: 1px solid #f1f2f6;">
-                    <div class="form-group"><label>Chave Pix</label><input type="text" id="adm-chave-pix" placeholder="CPF, E-mail ou Telefone"></div>
-                    <div class="form-group"><label>Nome Completo do Titular</label><input type="text" id="adm-nome-pix" placeholder="João da Silva"></div>
-                    <div class="form-group"><label>Banco</label><input type="text" id="adm-banco-pix" placeholder="Nubank"></div>
-                    <div class="form-group"><label>Cidade</label><input type="text" id="adm-cidade-pix" value="Brasil"></div>
+                    <div class="form-group"><label>Chave Pix</label><input type="text" id="adm-chave-pix" placeholder="Ex: (85) 99999-9999 ou e-mail"></div>
+                    <div class="form-group"><label>Nome Completo do Titular</label><input type="text" id="adm-nome-pix" placeholder="Ex: João da Silva"></div>
+                    <div class="form-group"><label>Banco</label><input type="text" id="adm-banco-pix" placeholder="Ex: Nubank, Caixa, Itaú"></div>
+                    <div class="form-group"><label>Cidade da Conta</label><input type="text" id="adm-cidade-pix" placeholder="Ex: Fortaleza"></div>
                     <button class="btn" onclick="salvarChavePix()">Salvar Chave Pix</button>
                 </div>
 
@@ -141,9 +182,21 @@
 
         <!-- TELA 4: PAINEL DO CLIENTE -->
         <div id="tela-cliente" class="hidden">
+            <div class="abas-nav">
+                <button class="aba-btn ativo" onclick="mudarAbaCliente('vitrine')" id="btn-cli-vitrine">Cardápio</button>
+                <button class="aba-btn" onclick="mudarAbaCliente('pedidos')" id="btn-cli-pedidos">Meus Pedidos</button>
+            </div>
+
+            <!-- SEÇÃO VITRINE -->
             <div id="secao-cli-vitrine">
                 <div id="lista-produtos-cliente"></div>
             </div>
+
+            <!-- SEÇÃO MEUS PEDIDOS -->
+            <div id="secao-cli-pedidos" class="hidden">
+                <div id="meus-pedidos-cliente"></div>
+            </div>
+
             <button class="btn" style="background-color: #2d3436; margin-top: 30px;" onclick="sair()">Sair da Conta</button>
         </div>
 
@@ -152,6 +205,10 @@
             <h2 style="margin-bottom: 16px; font-size: 22px;">Seu Carrinho</h2>
             <div id="itens-carrinho" style="margin-bottom: 20px;"></div>
             
+            <div id="bloco-aviso-desconto" class="hidden" style="background: #e1f5fe; color: #0277bd; padding: 12px; border-radius: 10px; margin-bottom: 16px; font-size: 14px; font-weight: bold; text-align: center;">
+                🎉 Desconto Especial Aplicado: R$ <span id="valor-desconto-aplicado">0,00</span>
+            </div>
+
             <div class="form-group">
                 <label>Forma de Pagamento</label>
                 <select id="pagamento-opcao" onchange="mudarPagamento()">
@@ -190,7 +247,24 @@
         let produtos = [];
         let carrinho = [];
         let clienteLogado = null;
+        let intervaloAtualizacao = null;
+        let digitandoNoAdmin = false;
         let pixGlobalDaLoja = {};
+
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('banner-instalacao').classList.remove('hidden');
+        });
+
+        document.getElementById('btn-instalar').addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt = null;
+                document.getElementById('banner-instalacao').classList.add('hidden');
+            }
+        });
 
         function mostrarAlerta(mensagem, titulo = "Aviso") {
             document.getElementById('modal-titulo').innerText = titulo;
@@ -207,15 +281,19 @@
                 document.getElementById(t).classList.add('hidden');
             });
             document.getElementById(idTela).classList.remove('hidden');
+            
+            clearInterval(intervaloAtualizacao);
 
             if(idTela === 'tela-cliente') {
                 document.getElementById('header-carrinho').classList.remove('hidden');
                 atualizarBarraCarrinho();
                 carregarCardapioCliente();
+                intervaloAtualizacao = setInterval(carregarMeusPedidosClienteSilencioso, 3000);
             } else if(idTela === 'tela-admin') {
                 document.getElementById('header-carrinho').classList.add('hidden');
                 document.getElementById('barra-carrinho').classList.add('hidden');
                 carregarChavePixServidor();
+                intervaloAtualizacao = setInterval(carregarPainelAdminSilencioso, 3000);
             } else {
                 document.getElementById('header-carrinho').classList.add('hidden');
                 document.getElementById('barra-carrinho').classList.add('hidden');
@@ -223,8 +301,8 @@
         }
 
         function mudarAbaAdmin(aba) {
-            ['secao-admin-cardapio', 'secao-admin-pedidos', 'secao-admin-config'].forEach(s => document.getElementById(s).classList.add('hidden'));
-            ['btn-aba-cardapio', 'btn-aba-pedidos', 'btn-aba-config'].forEach(b => document.getElementById(b).classList.remove('ativo'));
+            ['secao-admin-cardapio', 'secao-admin-pedidos', 'secao-admin-clientes', 'secao-admin-config'].forEach(s => document.getElementById(s).classList.add('hidden'));
+            ['btn-aba-cardapio', 'btn-aba-pedidos', 'btn-aba-clientes', 'btn-aba-config'].forEach(b => document.getElementById(b).classList.remove('ativo'));
 
             if(aba === 'cardapio') {
                 document.getElementById('secao-admin-cardapio').classList.remove('hidden');
@@ -232,6 +310,11 @@
             } else if(aba === 'pedidos') {
                 document.getElementById('secao-admin-pedidos').classList.remove('hidden');
                 document.getElementById('btn-aba-pedidos').classList.add('ativo');
+                carregarPainelAdmin();
+            } else if(aba === 'clientes') {
+                document.getElementById('secao-admin-clientes').classList.remove('hidden');
+                document.getElementById('btn-aba-clientes').classList.add('ativo');
+                carregarListaClientesAdmin();
             } else if(aba === 'config') {
                 document.getElementById('secao-admin-config').classList.remove('hidden');
                 document.getElementById('btn-aba-config').classList.add('ativo');
@@ -239,31 +322,51 @@
             }
         }
 
+        function mudarAbaCliente(aba) {
+            ['secao-cli-vitrine', 'secao-cli-pedidos'].forEach(s => document.getElementById(s).classList.add('hidden'));
+            ['btn-cli-vitrine', 'btn-cli-pedidos'].forEach(b => document.getElementById(b).classList.remove('ativo'));
+
+            if(aba === 'vitrine') {
+                document.getElementById('secao-cli-vitrine').classList.remove('hidden');
+                document.getElementById('btn-cli-vitrine').classList.add('ativo');
+            } else if(aba === 'pedidos') {
+                document.getElementById('secao-cli-pedidos').classList.remove('hidden');
+                document.getElementById('btn-cli-pedidos').classList.add('ativo');
+                carregarMeusPedidosCliente();
+            }
+        }
+
         async function fazerLogin() {
             const email = document.getElementById('login-email').value.trim().toLowerCase();
             const senha = document.getElementById('login-senha').value.trim();
+
+            if(!email || !senha) return mostrarAlerta("Preencha o e-mail e a senha!", "Campos Vazios");
 
             if(email === "adm@loja.com" && senha === "123456") {
                 document.getElementById('header-title').innerText = "Painel Admin";
                 mudarAbaAdmin('cardapio');
                 mostrarTela('tela-admin');
+                carregarPainelAdmin();
                 return;
             }
 
             try {
                 const res = await fetch(`${URL_RENDER}/api/usuarios`);
                 const usuarios = await res.json();
+                
                 const usuarioEncontrado = usuarios.find(u => u.email.toLowerCase() === email && u.senha === senha);
 
                 if(usuarioEncontrado) {
                     clienteLogado = usuarioEncontrado;
                     document.getElementById('header-title').innerText = `Olá, ${clienteLogado.nome}`;
+                    mudarAbaCliente('vitrine');
                     mostrarTela('tela-cliente');
+                    carregarCardapioCliente();
                 } else {
-                    mostrarAlerta("E-mail ou senha incorretos.", "Erro no Login");
+                    mostrarAlerta("E-mail não cadastrado ou senha incorreta. Verifique seus dados.", "Erro no Login");
                 }
             } catch(e) {
-                mostrarAlerta("Erro ao conectar com o Render.", "Erro");
+                mostrarAlerta("Erro ao conectar com o servidor no Render.", "Erro de Conexão");
             }
         }
 
@@ -274,23 +377,89 @@
             const endereco = document.getElementById('cad-endereco').value.trim();
             const bairro = document.getElementById('cad-bairro').value.trim();
             const cidade = document.getElementById('cad-cidade').value.trim();
+            const ref = document.getElementById('cad-ref').value.trim();
 
-            if(!nome || !email || !senha) return mostrarAlerta("Preencha os campos obrigatórios.", "Atenção");
+            if(!nome || !email || !senha || !endereco) return mostrarAlerta("Preencha os campos obrigatórios.", "Atenção");
+            if(!email.includes('@') || !email.includes('.')) return mostrarAlerta("Digite um e-mail válido.", "E-mail Inválido");
 
             try {
-                const novoCliente = { nome, email, senha, endereco: `${endereco}, ${bairro} - ${cidade}`, desconto: 0 };
+                const resCheck = await fetch(`${URL_RENDER}/api/usuarios`);
+                const usuariosExistentes = await resCheck.json();
+                const jaExiste = usuariosExistentes.some(u => u.email.toLowerCase() === email);
+
+                if(jaExiste) {
+                    return mostrarAlerta("Este e-mail já está cadastrado! Use outro e-mail ou vá para a tela de login.", "E-mail Existente");
+                }
+
+                const novoCliente = { 
+                    nome, 
+                    email, 
+                    senha, 
+                    endereco: `${endereco}, ${bairro} - ${cidade} (Ref: ${ref})`,
+                    desconto: 0 
+                };
+
                 const res = await fetch(`${URL_RENDER}/api/usuarios`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(novoCliente)
                 });
-                if(res.ok) {
-                    mostrarAlerta("Conta criada com sucesso!", "Sucesso");
+                const r = await res.json();
+                
+                if(r.sucesso || res.ok) {
+                    mostrarAlerta("Cadastro salvo na nuvem com sucesso! Faça login agora.", "Sucesso");
                     mostrarTela('tela-login');
+                } else {
+                    mostrarAlerta(r.erro || "Erro ao realizar cadastro.", "Erro");
                 }
             } catch(e) {
-                mostrarAlerta("Erro ao cadastrar.", "Erro");
+                mostrarAlerta("Erro ao conectar com o servidor no Render.", "Erro de Conexão");
             }
+        }
+
+        async function carregarListaClientesAdmin() {
+            try {
+                const res = await fetch(`${URL_RENDER}/api/usuarios`);
+                const usuarios = await res.json();
+                
+                document.getElementById('contador-usuarios-total').innerText = usuarios.length;
+                const container = document.getElementById('lista-clientes-admin');
+                container.innerHTML = usuarios.length === 0 ? '<p style="color:#636e72;">Nenhum cliente cadastrado.</p>' : '';
+
+                usuarios.forEach(cli => {
+                    let msgPromocao = encodeURIComponent(`Olá ${cli.nome}, temos uma promoção exclusiva esperando por você hoje no Delivery Express! Venha conferir! 🍔`);
+                    container.innerHTML += `
+                        <div class="cliente-card">
+                            <p><b>Nome:</b> ${cli.nome}</p>
+                            <p style="font-size: 14px; color: #636e72;"><b>E-mail:</b> ${cli.email}</p>
+                            <p style="font-size: 14px; color: #636e72;"><b>Endereço:</b> ${cli.endereco}</p>
+                            <p style="font-size: 14px; color: #00b894;"><b>Desconto Atual:</b> R$ ${(cli.desconto || 0).toFixed(2)}</p>
+                            
+                            <div style="display:flex; gap:8px; margin-top:8px;">
+                                <input type="number" step="0.01" id="desc-${cli.id}" placeholder="Valor R$" style="padding: 10px; font-size: 14px;">
+                                <button class="btn" style="background: #00b894; margin-top:0; padding:10px; font-size:14px;" onclick="atribuirDesconto(${cli.id})">Definir Desconto</button>
+                            </div>
+                            
+                            <a href="mailto:${cli.email}?subject=Promoção Exclusiva Delivery Express&body=${msgPromocao}" target="_blank" style="text-decoration: none;">
+                                <button class="btn" style="background: #0984e3; margin-top: 8px; padding: 10px; font-size: 14px;">✉️ Enviar Promoção por E-mail</button>
+                            </a>
+                        </div>
+                    `;
+                });
+            } catch(e) { console.error(e); }
+        }
+
+        async function atribuirDesconto(id) {
+            const val = parseFloat(document.getElementById(`desc-${id}`).value);
+            if(isNaN(val)) return mostrarAlerta("Digite um valor de desconto válido.", "Atenção");
+
+            await fetch(`${URL_RENDER}/api/usuarios/${id}/desconto`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ desconto: val })
+            });
+            mostrarAlerta("Desconto aplicado com sucesso para o cliente!", "Sucesso");
+            carregarListaClientesAdmin();
         }
 
         async function salvarChavePix() {
@@ -299,7 +468,7 @@
             const banco = document.getElementById('adm-banco-pix').value.trim();
             const cidade = document.getElementById('adm-cidade-pix').value.trim();
 
-            if(!chave || !nome) return mostrarAlerta("Preencha a chave e o titular.", "Atenção");
+            if(!chave || !nome || !banco) return mostrarAlerta("Preencha os campos principais do Pix.", "Atenção");
 
             try {
                 const res = await fetch(`${URL_RENDER}/api/pix`, {
@@ -308,14 +477,14 @@
                     body: JSON.stringify({ chave, nome, banco, cidade })
                 });
                 const r = await res.json();
-                if(res.ok && r.sucesso) {
+                if(res.ok || r.sucesso) {
                     carregarChavePixServidor();
-                    mostrarAlerta("Chave Pix salva e enviada para o Render com sucesso!", "Sucesso");
+                    mostrarAlerta("Chave Pix salva na nuvem com sucesso para todos os usuários!", "Sucesso");
                 } else {
-                    mostrarAlerta("Erro ao salvar no Render.", "Erro");
+                    mostrarAlerta("Erro ao salvar chave Pix no servidor.", "Erro");
                 }
             } catch(e) {
-                mostrarAlerta("Erro de conexão com o servidor.", "Erro");
+                mostrarAlerta("Erro ao conectar com o servidor no Render.", "Erro de Conexão");
             }
         }
 
@@ -360,19 +529,24 @@
         }
 
         function copiarChavePix() {
-            if(!pixGlobalDaLoja.copiaECola) return mostrarAlerta("Chave Pix não cadastrada.", "Atenção");
+            if(!pixGlobalDaLoja.copiaECola) return mostrarAlerta("Chave Pix não cadastrada pela loja.", "Atenção");
             navigator.clipboard.writeText(pixGlobalDaLoja.copiaECola);
-            mostrarAlerta("Código Pix Copia e Cola copiado com o valor exato!", "Pix Copiado");
+            mostrarAlerta("Código Pix Copia e Cola copiado com o valor exato! Cole no seu banco.", "Pix Copiado");
+            window.pixCopiadoPeloUsuario = true;
         }
 
         async function carregarCardapioCliente() {
             try {
                 const res = await fetch(`${URL_RENDER}/api/produtos`);
                 produtos = await res.json();
+                
                 const container = document.getElementById('lista-produtos-cliente');
                 container.innerHTML = '';
                 
-                produtos.forEach(p => {
+                const disponiveis = produtos.filter(p => p.ativo);
+                if(disponiveis.length === 0) return container.innerHTML = '<p style="color:#636e72;">Nenhum produto disponível.</p>';
+
+                disponiveis.forEach(p => {
                     container.innerHTML += `
                         <div class="produto-card">
                             <img src="${p.foto}" alt="Foto">
@@ -380,26 +554,178 @@
                                 <h4>${p.nome}</h4>
                                 <p>R$ ${p.preco.toFixed(2)}</p>
                             </div>
-                            <button onclick="adicionarAoCarrinho(${p.id})" style="background: #ff4757; color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 20px;">+</button>
+                            <button onclick="adicionarAoCarrinho(${p.id})" style="background: #ff4757; color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-weight: bold; font-size: 20px;">+</button>
                         </div>
                     `;
                 });
             } catch (e) { console.error(e); }
         }
 
+        async function carregarMeusPedidosCliente() {
+            try {
+                const res = await fetch(`${URL_RENDER}/api/pedidos`);
+                const pedidos = await res.json();
+                const container = document.getElementById('meus-pedidos-cliente');
+                
+                const meusPedidos = pedidos.filter(p => p.cliente === (clienteLogado ? clienteLogado.nome : ""));
+                container.innerHTML = meusPedidos.length === 0 ? '<p style="color:#636e72;">Nenhum pedido recente.</p>' : '';
+
+                meusPedidos.reverse().forEach(ped => {
+                    let corStatus = ped.status === 'Concluído' ? '#00b894' : '#ff4757';
+                    
+                    let barraProgressoHTML = '';
+                    if((ped.status === 'Em Preparo' || ped.status === 'Saiu para Entrega') && ped.minutosPreparo && ped.tempoInicio) {
+                        let tempoTotalMs = ped.minutosPreparo * 60 * 1000;
+                        let tempoDecorridoMs = Date.now() - ped.tempoInicio;
+                        let porcentagem = Math.max(0, Math.min(100, 100 - (tempoDecorridoMs / tempoTotalMs) * 100));
+                        let minutosRestantes = Math.max(0, Math.ceil((tempoTotalMs - tempoDecorridoMs) / (60 * 1000)));
+
+                        let iconeDeslocamento = porcentagem;
+
+                        barraProgressoHTML = `
+                            <p style="font-size: 14px; color: #636e72; margin-top: 6px;">Tempo restante: <b>${minutosRestantes} minutos</b></p>
+                            <div class="progress-wrapper">
+                                <div class="motoboy-container">
+                                    <div class="motoboy-icon" style="left: ${iconeDeslocamento}%;">🛵</div>
+                                </div>
+                                <div class="progress-bar-container"><div class="progress-bar-fill" style="width: ${porcentagem}%;"></div></div>
+                            </div>
+                        `;
+                    }
+
+                    container.innerHTML += `
+                        <div class="pedido-card">
+                            <div style="display:flex; justify-content:space-between;">
+                                <span style="font-size: 13px; color: #b2bec3;">Pedido #${String(ped.id).slice(-4)}</span>
+                                <span style="color: ${corStatus}; font-weight: 700; font-size: 14px;">● ${ped.status}</span>
+                            </div>
+                            <p style="font-size: 15px; font-weight: 700;">Total: R$ ${ped.total.toFixed(2)} (${ped.pagamento})</p>
+                            ${barraProgressoHTML}
+                        </div>
+                    `;
+                });
+            } catch (e) { console.error(e); }
+        }
+
+        async function carregarMeusPedidosClienteSilencioso() {
+            if(!document.getElementById('tela-cliente').classList.contains('hidden') && !document.getElementById('secao-cli-pedidos').classList.contains('hidden')) {
+                await carregarMeusPedidosCliente();
+            }
+        }
+
+        async function carregarPainelAdmin() {
+            if (digitandoNoAdmin) return;
+
+            try {
+                const resProd = await fetch(`${URL_RENDER}/api/produtos`);
+                produtos = await resProd.json();
+                
+                const containerProd = document.getElementById('lista-produtos-admin');
+                containerProd.innerHTML = '';
+                produtos.forEach(p => {
+                    containerProd.innerHTML += `
+                        <div class="produto-card">
+                            <img src="${p.foto}" alt="Foto">
+                            <div class="produto-info">
+                                <h4>${p.nome}</h4>
+                                <p>R$ ${p.preco.toFixed(2)}</p>
+                                <span style="font-size: 13px; color: ${p.ativo ? '#00b894' : '#d63031'}; font-weight: 700;">${p.ativo ? '● Disponível' : '● Oculto'}</span>
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                <button onclick="alternarStatus(${p.id}, ${!p.ativo})" style="background: #dfe6e9; border: none; padding: 8px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 700;">${p.ativo ? 'Ocultar' : 'Exibir'}</button>
+                                <button onclick="excluirProduto(${p.id})" style="background: #ffeaa7; color: #d63031; border: none; padding: 8px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 700;">Excluir</button>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                const resPed = await fetch(`${URL_RENDER}/api/pedidos`);
+                const pedidos = await resPed.json();
+                const containerPed = document.getElementById('lista-pedidos-admin');
+                containerPed.innerHTML = pedidos.length === 0 ? '<p style="color:#636e72;">Nenhum pedido.</p>' : '';
+
+                pedidos.reverse().forEach(ped => {
+                    let itensTxt = Array.isArray(ped.itens) ? ped.itens.map(i => `${i.qtd}x ${i.nome}`).join(', ') : 'Detalhes indisponíveis';
+                    let avisoPixCopiado = ped.pixCopiado ? '<p style="color: #e1b12c; font-weight: 700; font-size: 13px;">⚠️ Cliente copiou a chave Pix (Aguardando Confirmação)</p>' : '';
+
+                    containerPed.innerHTML += `
+                        <div class="pedido-card" style="border-left: 5px solid #ff4757;">
+                            <strong>${ped.cliente}</strong> - R$ ${ped.total.toFixed(2)} (${ped.pagamento})<br>
+                            <span style="font-size: 13px; color: #636e72;">${ped.endereco}</span>
+                            <p style="font-size: 14px; margin: 4px 0;"><b>Itens:</b> ${itensTxt}</p>
+                            ${avisoPixCopiado}
+                            <p style="color: #ff4757; font-weight: 700; font-size: 13px;">Status: ${ped.status}</p>
+                            
+                            <div style="display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; align-items: center;">
+                                <input type="number" id="tempo-${ped.id}" placeholder="Min" onfocus="digitandoNoAdmin = true" onblur="digitandoNoAdmin = false" style="width: 80px; height: 38px; font-size: 14px; padding: 6px;">
+                                <button onclick="confirmarPixEPreparo(${ped.id})" style="background: #00b894; color: white; border: none; padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 700;">Pix OK & Iniciar</button>
+                                <button onclick="atualizarStatusPedido(${ped.id}, 'Saiu para Entrega')" style="background: #e1b12c; color: white; border: none; padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 700;">Entrega</button>
+                                <button onclick="atualizarStatusPedido(${ped.id}, 'Concluído')" style="background: #0984e3; color: white; border: none; padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 700;">Concluir</button>
+                                <button onclick="excluirPedido(${ped.id})" style="background: #ffeaa7; color: #d63031; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 700;">Excluir</button>
+                            </div>
+                        </div>
+                    `;
+                });
+            } catch (e) { console.error(e); }
+        }
+
+        async function carregarPainelAdminSilencioso() {
+            if(!document.getElementById('tela-admin').classList.contains('hidden') && !document.getElementById('secao-admin-pedidos').classList.contains('hidden')) {
+                await carregarPainelAdmin();
+            }
+        }
+
         async function adicionarProduto() {
             const nome = document.getElementById('adm-nome-prod').value;
             const preco = parseFloat(document.getElementById('adm-preco-prod').value);
-            const foto = document.getElementById('adm-foto-prod').value || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=300&q=80";
+            const inputFoto = document.getElementById('adm-foto-prod');
 
             if(!nome || isNaN(preco)) return mostrarAlerta("Preencha nome e preço.", "Atenção");
 
+            if(inputFoto.files && inputFoto.files[0]) {
+                const reader = new FileReader();
+                reader.onload = async function(e) {
+                    await enviarProd(nome, preco, e.target.result);
+                }
+                reader.readAsDataURL(inputFoto.files[0]);
+            } else {
+                await enviarProd(nome, preco, "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=300&q=80");
+            }
+        }
+
+        async function enviarProd(nome, preco, foto) {
             await fetch(`${URL_RENDER}/api/produtos`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ nome, preco, foto, ativo: true })
+                body: JSON.stringify({ nome, preco, foto })
             });
-            mostrarAlerta("Produto adicionado!", "Sucesso");
+            document.getElementById('adm-nome-prod').value = '';
+            document.getElementById('adm-preco-prod').value = '';
+            document.getElementById('adm-foto-prod').value = '';
+            await carregarPainelAdmin();
+        }
+
+        async function alternarStatus(id, novoStatus) {
+            await fetch(`${URL_RENDER}/api/produtos/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ativo: novoStatus })
+            });
+            await carregarPainelAdmin();
+        }
+
+        async function excluirProduto(id) {
+            await fetch(`${URL_RENDER}/api/produtos/${id}`, { method: 'DELETE' });
+            await carregarPainelAdmin();
+        }
+
+        async function excluirPedido(id) {
+            try {
+                const res = await fetch(`${URL_RENDER}/api/pedidos/${id}`, { method: 'DELETE' });
+                if(res.ok) {
+                    carregarPainelAdmin();
+                }
+            } catch(e) {}
         }
 
         function adicionarAoCarrinho(id) {
@@ -424,8 +750,18 @@
 
         async function abrirCarrinho() {
             mostrarTela('tela-carrinho');
+            window.pixCopiadoPeloUsuario = false;
+
+            try {
+                const res = await fetch(`${URL_RENDER}/api/usuarios`);
+                const usuarios = await res.json();
+                const atual = usuarios.find(u => u.email.toLowerCase() === clienteLogado.email.toLowerCase());
+                if(atual) clienteLogado = atual;
+            } catch(e) {}
+
             const container = document.getElementById('itens-carrinho');
             container.innerHTML = '';
+            if(carrinho.length === 0) return container.innerHTML = '<p>Carrinho vazio.</p>';
             
             let subtotal = 0;
             carrinho.forEach(i => {
@@ -433,10 +769,26 @@
                 container.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:15px;"><span><b>${i.qtd}x</b> ${i.nome}</span><span>R$ ${(i.preco * i.qtd).toFixed(2)}</span></div>`;
             });
 
-            container.innerHTML += `<div style="display:flex; justify-content:space-between; font-weight:700; font-size:18px; margin-top:15px; border-top:1px solid #eee; padding-top:10px;"><span>Total:</span><span>R$ ${subtotal.toFixed(2)}</span></div>`;
+            let desconto = clienteLogado.desconto || 0;
+            let totalFinal = Math.max(0, subtotal - desconto);
 
-            // Busca a chave Pix no Render com o valor total exato do carrinho
-            await carregarChavePixServidor(subtotal);
+            if(desconto > 0) {
+                document.getElementById('bloco-aviso-desconto').classList.remove('hidden');
+                document.getElementById('valor-desconto-aplicado').innerText = desconto.toFixed(2);
+            } else {
+                document.getElementById('bloco-aviso-desconto').classList.add('hidden');
+            }
+
+            container.innerHTML += `
+                <div style="margin-top:15px; border-top:1px solid #eee; padding-top:10px;">
+                    <div style="display:flex; justify-content:space-between; font-size:15px; color:#636e72;"><span>Subtotal:</span><span>R$ ${subtotal.toFixed(2)}</span></div>
+                    ${desconto > 0 ? `<div style="display:flex; justify-content:space-between; font-size:15px; color:#00b894;"><span>Desconto:</span><span>- R$ ${desconto.toFixed(2)}</span></div>` : ''}
+                    <div style="display:flex; justify-content:space-between; font-weight:700; font-size:18px; margin-top:6px;"><span>Total a Pagar:</span><span>R$ ${totalFinal.toFixed(2)}</span></div>
+                </div>
+            `;
+
+            // Busca o Pix no servidor passando o valor total exato do carrinho
+            await carregarChavePixServidor(totalFinal);
         }
 
         function mudarPagamento() {
@@ -451,35 +803,92 @@
         }
 
         function voltarVitrine() { 
-            mostrarTela('tela-cliente'); 
+            mostrarTela('tela-cliente');
+            mudarAbaCliente('vitrine');
         }
 
         async function finalizarPedidoNoApp() {
             if(carrinho.length === 0) return mostrarAlerta("Carrinho vazio!", "Atenção");
-            let total = carrinho.reduce((acc, i) => acc + (i.preco * i.qtd), 0);
-            const pagamento = document.getElementById('pagamento-opcao').value;
+            
+            let subtotal = carrinho.reduce((acc, i) => acc + (i.preco * i.qtd), 0);
+            let desconto = clienteLogado.desconto || 0;
+            let totalFinal = Math.max(0, subtotal - desconto);
 
-            await fetch(`${URL_RENDER}/api/pedidos`, {
+            const pagamento = document.getElementById('pagamento-opcao').value;
+            const troco = document.getElementById('info-troco').value;
+
+            const pedidoData = {
+                cliente: clienteLogado ? clienteLogado.nome : "Cliente",
+                endereco: clienteLogado ? clienteLogado.endereco : "Endereço Principal",
+                itens: carrinho,
+                total: totalFinal,
+                pagamento: pagamento,
+                troco: troco || "Não precisa",
+                pixCopiado: window.pixCopiadoPeloUsuario || false,
+                status: pagamento === 'Pix' ? 'Aguardando Confirmação do Pix' : 'Recebido'
+            };
+
+            const res = await fetch(`${URL_RENDER}/api/pedidos`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    cliente: clienteLogado ? clienteLogado.nome : "Cliente",
-                    endereco: clienteLogado ? clienteLogado.endereco : "Endereço",
-                    itens: carrinho,
-                    total: total,
-                    pagamento: pagamento,
-                    status: 'Recebido'
-                })
+                body: JSON.stringify(pedidoData)
             });
 
-            mostrarAlerta("Pedido enviado com sucesso!", "Sucesso");
-            carrinho = [];
-            mostrarTela('tela-cliente');
+            const r = await res.json();
+            if(res.ok || r.sucesso) {
+                if(desconto > 0) {
+                    await fetch(`${URL_RENDER}/api/usuarios/${clienteLogado.id}/desconto`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ desconto: 0 })
+                    });
+                }
+
+                mostrarAlerta("Pedido enviado com sucesso!", "Sucesso");
+                carrinho = [];
+                mostrarTela('tela-cliente');
+                mudarAbaCliente('pedidos');
+            }
+        }
+
+        async function confirmarPixEPreparo(id) {
+            let inputMinutos = document.getElementById(`tempo-${id}`);
+            let minutos = parseInt(inputMinutos.value);
+            
+            if(isNaN(minutos) || minutos <= 0) {
+                return mostrarAlerta("Digite a quantidade de minutos válida para o preparo.", "Atenção");
+            }
+            
+            digitandoNoAdmin = false;
+
+            await fetch(`${URL_RENDER}/api/pedidos/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    status: 'Em Preparo', 
+                    minutosPreparo: minutos,
+                    tempoInicio: Date.now() 
+                })
+            });
+            mostrarAlerta("Pedido em preparo iniciado com sucesso!", "Sucesso");
+            await carregarPainelAdmin();
+        }
+
+        async function atualizarStatusPedido(id, novoStatus) {
+            await fetch(`${URL_RENDER}/api/pedidos/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: novoStatus })
+            });
+            await carregarPainelAdmin();
         }
 
         function sair() { 
+            clearInterval(intervaloAtualizacao);
             mostrarTela('tela-login'); 
         }
+
+        if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js'); }
     </script>
 </body>
 </html>
