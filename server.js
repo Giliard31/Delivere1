@@ -142,21 +142,95 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}`);
 });
-// Variável para guardar o Pix na memória/servidor
+// ==========================================
+// FUNÇÕES DO PIX (Copie e cole no seu server.js)
+// ==========================================
+
+// Variável para guardar o Pix na memória do servidor
 let configuracaoPix = {
     chave: "",
     nome: "",
-    banco: ""
+    banco: "",
+    cidade: "Brasil" // Adicionado o campo cidade para o padrão do Pix
 };
 
-// Rota para buscar o Pix
-app.get('/api/pix', (req, res) => {
-    res.json(configuracaoPix);
+// 1. Função principal que monta o Pix Copia e Cola (Padrão BCB)
+function gerarPayloadPix(chave, nome, cidade, valor, idTransacao = "***") {
+    const formato = (id, valorCampo) => {
+        const tamanho = String(valorCampo.length).padStart(2, '0');
+        return id + tamanho + valorCampo;
+    };
+
+    let payload = formato("00", "01");
+    
+    let infoConta = formato("00", "br.gov.bcb.pix") + formato("01", chave);
+    payload += formato("26", infoConta);
+
+    payload += formato("52", "0000"); // Merchant Category Code
+    payload += formato("53", "986");  // Moeda (BRL = 986)
+    
+    if (valor > 0) {
+        payload += formato("54", valor.toFixed(2));
+    }
+
+    payload += formato("58", "BR");   // País
+    payload += formato("59", nome);   // Nome do Recebedor
+    payload += formato("60", cidade); // Cidade do Recebedor
+    
+    let infoAdicional = formato("05", idTransacao);
+    payload += formato("62", infoAdicional);
+
+    payload += "6304";
+    payload += calcularCRC16(payload);
+
+    return payload;
+}
+
+// 2. Cálculo CRC16 obrigatório do Pix
+function calcularCRC16(payload) {
+    let polinomio = 0x1021;
+    let resultado = 0xFFFF;
+    let bytes = Buffer.from(payload, 'utf8');
+
+    for (let b of bytes) {
+        resultado ^= (b << 8);
+        for (let i = 0; i < 8; i++) {
+            if ((resultado & 0x8000) !== 0) {
+                resultado = ((resultado << 1) ^ polinomio) & 0xFFFF;
+            } else {
+                resultado = ((resultado << 1) & 0xFFFF;
+            }
+        }
+    }
+    return resultado.toString(16).toUpperCase().padStart(4, '0');
+}
+
+// 3. Rota para o Admin SALVAR o Pix (com chave, nome, banco e cidade)
+app.post('/api/pix', (req, res) => {
+    const { chave, nome, banco, cidade } = req.body;
+    configuracaoPix = { 
+        chave, 
+        nome, 
+        banco, 
+        cidade: cidade || "Brasil" 
+    };
+    res.json({ sucesso: true });
 });
 
-// Rota para salvar o Pix
-app.post('/api/pix', (req, res) => {
-    const { chave, nome, banco } = req.body;
-    configuracaoPix = { chave, nome, banco };
-    res.json({ sucesso: true });
+// 4. Rota para o Cliente BUSCAR o Pix já com o VALOR da compra embutido
+app.get('/api/pix', (req, res) => {
+    const valorCompra = parseFloat(req.query.valor) || 0;
+    
+    // Gera o código completo Copia e Cola com o valor exato
+    const copiaEColaComValor = gerarPayloadPix(
+        configuracaoPix.chave, 
+        configuracaoPix.nome || "Loja", 
+        configuracaoPix.cidade || "Brasil", 
+        valorCompra
+    );
+
+    res.json({
+        ...configuracaoPix,
+        copiaECola: copiaEColaComValor // É este código que vai com o valor embutido para o cliente
+    });
 });
