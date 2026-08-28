@@ -227,6 +227,7 @@
         let carrinho = [];
         let clienteLogado = null;
         let intervaloAtualizacao = null;
+        let digitandoNoAdmin = false; // Trava para o teclado não fechar
 
         let deferredPrompt;
         window.addEventListener('beforeinstallprompt', (e) => {
@@ -303,14 +304,12 @@
             }
         }
 
-        // LOGIN SEGURO NA NUVEM (Validação de e-mail e senha exatos)
         async function fazerLogin() {
             const email = document.getElementById('login-email').value.trim().toLowerCase();
             const senha = document.getElementById('login-senha').value.trim();
 
             if(!email || !senha) return alert("Preencha o e-mail e a senha!");
 
-            // Acesso do Administrador da Loja
             if(email === "adm@loja.com" && senha === "123456") {
                 document.getElementById('header-title').innerText = "Painel Admin";
                 mudarAbaAdmin('cardapio');
@@ -323,7 +322,6 @@
                 const res = await fetch(`${URL_RENDER}/api/usuarios`);
                 const usuarios = await res.json();
                 
-                // Procura exatamente pelo e-mail e senha correspondentes na nuvem
                 const usuarioEncontrado = usuarios.find(u => u.email.toLowerCase() === email && u.senha === senha);
 
                 if(usuarioEncontrado) {
@@ -353,7 +351,6 @@
             if(!email.includes('@') || !email.includes('.')) return alert("Digite um e-mail válido.");
 
             try {
-                // Checa se o e-mail já existe na base antes de cadastrar
                 const resCheck = await fetch(`${URL_RENDER}/api/usuarios`);
                 const usuariosExistentes = await resCheck.json();
                 const jaExiste = usuariosExistentes.some(u => u.email.toLowerCase() === email);
@@ -522,10 +519,15 @@
                     let corStatus = ped.status === 'Concluído' ? '#00b894' : '#ff4757';
                     
                     let barraProgressoHTML = '';
-                    if(ped.status === 'Em Preparo' && ped.minutosPreparo) {
+                    if(ped.status === 'Em Preparo' && ped.minutosPreparo && ped.tempoInicio) {
+                        let tempoTotalMs = ped.minutosPreparo * 60 * 1000;
+                        let tempoDecorridoMs = Date.now() - ped.tempoInicio;
+                        let porcentagem = Math.max(0, 100 - (tempoDecorridoMs / tempoTotalMs) * 100);
+                        let minutosRestantes = Math.max(0, Math.ceil((tempoTotalMs - tempoDecorridoMs) / (60 * 1000)));
+
                         barraProgressoHTML = `
-                            <p style="font-size: 14px; color: #636e72; margin-top: 6px;">Tempo restante: <b id="timer-${ped.id}">${ped.minutosPreparo} minutos</b></p>
-                            <div class="progress-bar-container"><div class="progress-bar-fill" id="bar-${ped.id}" style="width: 100%;"></div></div>
+                            <p style="font-size: 14px; color: #636e72; margin-top: 6px;">Tempo restante: <b>${minutosRestantes} minutos</b></p>
+                            <div class="progress-bar-container"><div class="progress-bar-fill" style="width: ${porcentagem}%;"></div></div>
                         `;
                     }
 
@@ -550,6 +552,8 @@
         }
 
         async function carregarPainelAdmin() {
+            if (digitandoNoAdmin) return; // Trava para não fechar o teclado enquanto o admin digita
+
             try {
                 const resProd = await fetch(`${URL_RENDER}/api/produtos`);
                 produtos = await resProd.json();
@@ -591,8 +595,8 @@
                             <p style="color: #ff4757; font-weight: 700; font-size: 13px;">Status: ${ped.status}</p>
                             
                             <div style="display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; align-items: center;">
-                                <input type="number" id="tempo-${ped.id}" placeholder="Minutos" style="width: 90px; height: 38px; font-size: 14px; padding: 6px;">
-                                <button onclick="confirmarPixEPreparo(${ped.id})" style="background: #00b894; color: white; border: none; padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 700;">Pix Confirmado & Iniciar</button>
+                                <input type="number" id="tempo-${ped.id}" placeholder="Min" onfocus="digitandoNoAdmin = true" onblur="digitandoNoAdmin = false" style="width: 80px; height: 38px; font-size: 14px; padding: 6px;">
+                                <button onclick="confirmarPixEPreparo(${ped.id})" style="background: #00b894; color: white; border: none; padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 700;">Pix OK & Iniciar</button>
                                 <button onclick="atualizarStatusPedido(${ped.id}, 'Saiu para Entrega')" style="background: #e1b12c; color: white; border: none; padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 700;">Entrega</button>
                                 <button onclick="atualizarStatusPedido(${ped.id}, 'Concluído')" style="background: #0984e3; color: white; border: none; padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 700;">Concluir</button>
                                 <button onclick="excluirPedido(${ped.id})" style="background: #ffeaa7; color: #d63031; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 700;">Excluir</button>
@@ -653,7 +657,6 @@
             await carregarPainelAdmin();
         }
 
-        // EXCLUSÃO CORRIGIDA DE PEDIDOS NA NUVEM
         async function excluirPedido(id) {
             if(!confirm("Tem certeza que deseja excluir este pedido?")) return;
             try {
@@ -790,14 +793,25 @@
         }
 
         async function confirmarPixEPreparo(id) {
-            let minutos = document.getElementById(`tempo-${id}`).value;
-            if(!minutos) return alert("Digite os minutos de preparo.");
+            let inputMinutos = document.getElementById(`tempo-${id}`);
+            let minutos = parseInt(inputMinutos.value);
             
+            if(isNaN(minutos) || minutos <= 0) {
+                return alert("Digite a quantidade de minutos válida para o preparo.");
+            }
+            
+            digitandoNoAdmin = false; // Destrava a atualização
+
             await fetch(`${URL_RENDER}/api/pedidos/${id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: 'Em Preparo', minutosPreparo: parseInt(minutos) })
+                body: JSON.stringify({ 
+                    status: 'Em Preparo', 
+                    minutosPreparo: minutos,
+                    tempoInicio: Date.now() 
+                })
             });
+            alert("Pedido em preparo iniciado com sucesso!");
             await carregarPainelAdmin();
         }
 
