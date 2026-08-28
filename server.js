@@ -147,90 +147,83 @@ app.listen(PORT, () => {
 // ==========================================
 
 // Variável para guardar o Pix na memória do servidor
-let configuracaoPix = {
-    chave: "",
-    nome: "",
-    banco: "",
-    cidade: "Brasil" // Adicionado o campo cidade para o padrão do Pix
-};
+const fs = require('fs');
+const path = require('path');
 
-// 1. Função principal que monta o Pix Copia e Cola (Padrão BCB)
-function gerarPayloadPix(chave, nome, cidade, valor, idTransacao = "***") {
-    const formato = (id, valorCampo) => {
-        const tamanho = String(valorCampo.length).padStart(2, '0');
-        return id + tamanho + valorCampo;
-    };
+// Caminho do arquivo onde o Pix será salvo permanentemente no servidor
+const arquivoPixPath = path.join(__dirname, 'pix.json');
 
-    let payload = formato("00", "01");
-    
-    let infoConta = formato("00", "br.gov.bcb.pix") + formato("01", chave);
-    payload += formato("26", infoConta);
-
-    payload += formato("52", "0000"); // Merchant Category Code
-    payload += formato("53", "986");  // Moeda (BRL = 986)
-    
-    if (valor > 0) {
-        payload += formato("54", valor.toFixed(2));
-    }
-
-    payload += formato("58", "BR");   // País
-    payload += formato("59", nome);   // Nome do Recebedor
-    payload += formato("60", cidade); // Cidade do Recebedor
-    
-    let infoAdicional = formato("05", idTransacao);
-    payload += formato("62", infoAdicional);
-
-    payload += "6304";
-    payload += calcularCRC16(payload);
-
-    return payload;
-}
-
-// 2. Cálculo CRC16 obrigatório do Pix
-function calcularCRC16(payload) {
-    let polinomio = 0x1021;
-    let resultado = 0xFFFF;
-    let bytes = Buffer.from(payload, 'utf8');
-
-    for (let b of bytes) {
-        resultado ^= (b << 8);
-        for (let i = 0; i < 8; i++) {
-            if ((resultado & 0x8000) !== 0) {
-                resultado = ((resultado << 1) ^ polinomio) & 0xFFFF;
-            } else {
-                resultado = ((resultado << 1) & 0xFFFF;
-            }
+// Função para ler a configuração do Pix salva no arquivo
+function lerConfigPix() {
+    try {
+        if (fs.existsSync(arquivoPixPath)) {
+            const dados = fs.readFileSync(arquivoPixPath, 'utf8');
+            return JSON.parse(dados);
         }
+    } catch (e) {
+        console.error("Erro ao ler o arquivo Pix:", e);
     }
-    return resultado.toString(16).toUpperCase().padStart(4, '0');
+    // Retorno padrão caso o arquivo não exista
+    return { chave: "", nome: "", banco: "", cidade: "Brasil" };
 }
 
-// 3. Rota para o Admin SALVAR o Pix (com chave, nome, banco e cidade)
+// Função para salvar a configuração do Pix no arquivo
+function salvarConfigPix(config) {
+    try {
+        fs.writeFileSync(arquivoPixPath, JSON.stringify(config, null, 2), 'utf8');
+        return true;
+    } catch (e) {
+        console.error("Erro ao salvar o arquivo Pix:", e);
+        return false;
+    }
+}
+
+// 1. Rota para o Admin SALVAR a Chave Pix (agora salva em arquivo permanente)
 app.post('/api/pix', (req, res) => {
     const { chave, nome, banco, cidade } = req.body;
-    configuracaoPix = { 
-        chave, 
-        nome, 
-        banco, 
+    
+    const novaConfig = { 
+        chave: chave || "", 
+        nome: nome || "Loja", 
+        banco: banco || "", 
         cidade: cidade || "Brasil" 
     };
-    res.json({ sucesso: true });
+    
+    const salvo = salvarConfigPix(novaConfig);
+    
+    if (salvo) {
+        console.log("Chave Pix salva permanentemente:", novaConfig);
+        res.json({ sucesso: true });
+    } else {
+        res.status(500).json({ sucesso: false, erro: "Não foi possível salvar o arquivo Pix." });
+    }
 });
 
-// 4. Rota para o Cliente BUSCAR o Pix já com o VALOR da compra embutido
+// 2. Rota para o Cliente ou Admin BUSCAR o Pix (lê do arquivo e gera o Payload com valor)
 app.get('/api/pix', (req, res) => {
     const valorCompra = parseFloat(req.query.valor) || 0;
+    const configuracaoPix = lerConfigPix();
     
-    // Gera o código completo Copia e Cola com o valor exato
+    // Se a chave estiver vazia, retorna os dados vazios
+    if (!configuracaoPix.chave) {
+        return res.json({ chave: "", nome: "", banco: "", copiaECola: "" });
+    }
+
+    // Gera o código completo Copia e Cola com o valor exato da compra
     const copiaEColaComValor = gerarPayloadPix(
         configuracaoPix.chave, 
-        configuracaoPix.nome || "Loja", 
+        configuraPixSegura(configuracaoPix.nome), 
         configuracaoPix.cidade || "Brasil", 
         valorCompra
     );
 
     res.json({
         ...configuracaoPix,
-        copiaECola: copiaEColaComValor // É este código que vai com o valor embutido para o cliente
+        copiaECola: copiaEColaComValor
     });
 });
+
+// Função auxiliar para evitar erros caso o nome venha vazio
+function configuraPixSegura(texto) {
+    return texto && texto.trim() !== "" ? texto : "Loja";
+}
