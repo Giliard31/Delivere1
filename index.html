@@ -471,15 +471,20 @@
             if(!chave || !nome || !banco) return mostrarAlerta("Preencha os campos principais do Pix.", "Atenção");
 
             try {
-                await fetch(`${URL_RENDER}/api/pix`, {
+                const res = await fetch(`${URL_RENDER}/api/pix`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ chave, nome, banco, cidade })
                 });
-                carregarChavePixServidor();
-                mostrarAlerta("Chave Pix salva na nuvem com sucesso para todos os usuários!", "Sucesso");
+                const r = await res.json();
+                if(res.ok || r.sucesso) {
+                    carregarChavePixServidor();
+                    mostrarAlerta("Chave Pix salva na nuvem com sucesso para todos os usuários!", "Sucesso");
+                } else {
+                    mostrarAlerta("Erro ao salvar chave Pix no servidor.", "Erro");
+                }
             } catch(e) {
-                mostrarAlerta("Erro ao salvar Pix no servidor.", "Erro");
+                mostrarAlerta("Erro ao conectar com o servidor no Render.", "Erro de Conexão");
             }
         }
 
@@ -489,7 +494,7 @@
                 const dadosPix = await res.json();
                 pixGlobalDaLoja = dadosPix;
 
-                if(dadosPix && dadosPix.chave) {
+                if(dadosPix && dadosPix.chave && dadosPix.chave.trim() !== "") {
                     document.getElementById('form-pix-admin').classList.add('hidden');
                     document.getElementById('painel-pix-minimizado').classList.remove('hidden');
                     
@@ -503,6 +508,10 @@
                 } else {
                     document.getElementById('form-pix-admin').classList.remove('hidden');
                     document.getElementById('painel-pix-minimizado').classList.add('hidden');
+
+                    document.getElementById('exibe-chave').innerText = "Loja ainda não cadastrou a chave Pix";
+                    document.getElementById('exibe-nome').innerText = "-";
+                    document.getElementById('exibe-banco').innerText = "-";
                 }
             } catch(e) { console.error(e); }
         }
@@ -510,6 +519,13 @@
         function editarChavePix() {
             document.getElementById('form-pix-admin').classList.remove('hidden');
             document.getElementById('painel-pix-minimizado').classList.add('hidden');
+
+            if (pixGlobalDaLoja.chave) {
+                document.getElementById('adm-chave-pix').value = pixGlobalDaLoja.chave;
+                document.getElementById('adm-nome-pix').value = pixGlobalDaLoja.nome || '';
+                document.getElementById('adm-banco-pix').value = pixGlobalDaLoja.banco || '';
+                document.getElementById('adm-cidade-pix').value = pixGlobalDaLoja.cidade || 'Brasil';
+            }
         }
 
         function copiarChavePix() {
