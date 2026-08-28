@@ -8,12 +8,12 @@
   "theme_color": "#ff4757",
   "icons": [
     {
-      "src": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=192&q=80",
+      "src": "https://raw.githubusercontent.com/Giliard31/Delivere1/refs/heads/main/Screenshot_20260828-074217%7E2.jpg",
       "sizes": "192x192",
       "type": "image/jpeg"
     },
     {
-      "src": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=512&q=80",
+      "src": "https://raw.githubusercontent.com/Giliard31/Delivere1/refs/heads/main/Screenshot_20260828-074217%7E2.jpg",
       "sizes": "512x512",
       "type": "image/jpeg"
     }
