@@ -29,7 +29,6 @@
         .link { text-align: center; margin-top: 20px; color: #ff4757; cursor: pointer; font-size: 15px; font-weight: 700; }
         .hidden { display: none !important; }
         
-        /* Abas Estilo App Nativo */
         .abas-nav { display: flex; background: white; border-radius: 12px; padding: 6px; margin-bottom: 18px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); overflow-x: auto; gap: 4px; }
         .aba-btn { flex: 1; padding: 10px 12px; text-align: center; border: none; background: transparent; font-weight: 700; font-size: 13px; color: #636e72; border-radius: 10px; cursor: pointer; transition: 0.2s; white-space: nowrap; }
         .aba-btn.ativo { background: #ff4757; color: white; box-shadow: 0 2px 8px rgba(255,71,87,0.3); }
@@ -42,7 +41,6 @@
         
         .pedido-card, .cliente-card { flex-direction: column; align-items: stretch; gap: 8px; font-size: 15px; }
         
-        /* Barra Regressiva do Pedido */
         .progress-bar-container { background: #dfe6e9; border-radius: 8px; height: 10px; width: 100%; overflow: hidden; margin-top: 6px; }
         .progress-bar-fill { background: #00b894; height: 100%; width: 100%; transition: width 1s linear; }
 
@@ -305,12 +303,14 @@
             }
         }
 
+        // LOGIN SEGURO NA NUVEM (Validação de e-mail e senha exatos)
         async function fazerLogin() {
-            const email = document.getElementById('login-email').value.trim();
+            const email = document.getElementById('login-email').value.trim().toLowerCase();
             const senha = document.getElementById('login-senha').value.trim();
 
-            if(!email || !senha) return alert("Preencha todos os campos!");
+            if(!email || !senha) return alert("Preencha o e-mail e a senha!");
 
+            // Acesso do Administrador da Loja
             if(email === "adm@loja.com" && senha === "123456") {
                 document.getElementById('header-title').innerText = "Painel Admin";
                 mudarAbaAdmin('cardapio');
@@ -322,7 +322,9 @@
             try {
                 const res = await fetch(`${URL_RENDER}/api/usuarios`);
                 const usuarios = await res.json();
-                const usuarioEncontrado = usuarios.find(u => u.email === email && u.senha === senha);
+                
+                // Procura exatamente pelo e-mail e senha correspondentes na nuvem
+                const usuarioEncontrado = usuarios.find(u => u.email.toLowerCase() === email && u.senha === senha);
 
                 if(usuarioEncontrado) {
                     clienteLogado = usuarioEncontrado;
@@ -331,7 +333,7 @@
                     mostrarTela('tela-cliente');
                     carregarCardapioCliente();
                 } else {
-                    alert("E-mail não cadastrado na nuvem ou senha incorreta.");
+                    alert("E-mail não cadastrado ou senha incorreta. Verifique seus dados.");
                 }
             } catch(e) {
                 alert("Erro ao conectar com o servidor no Render.");
@@ -340,7 +342,7 @@
 
         async function salvarCadastro() {
             const nome = document.getElementById('cad-nome').value.trim();
-            const email = document.getElementById('cad-email').value.trim();
+            const email = document.getElementById('cad-email').value.trim().toLowerCase();
             const senha = document.getElementById('cad-senha').value.trim();
             const endereco = document.getElementById('cad-endereco').value.trim();
             const bairro = document.getElementById('cad-bairro').value.trim();
@@ -348,30 +350,41 @@
             const ref = document.getElementById('cad-ref').value.trim();
 
             if(!nome || !email || !senha || !endereco) return alert("Preencha os campos obrigatórios.");
-
-            const novoCliente = { 
-                nome, 
-                email, 
-                senha, 
-                endereco: `${endereco}, ${bairro} - ${cidade} (Ref: ${ref})`,
-                desconto: 0 
-            };
+            if(!email.includes('@') || !email.includes('.')) return alert("Digite um e-mail válido.");
 
             try {
+                // Checa se o e-mail já existe na base antes de cadastrar
+                const resCheck = await fetch(`${URL_RENDER}/api/usuarios`);
+                const usuariosExistentes = await resCheck.json();
+                const jaExiste = usuariosExistentes.some(u => u.email.toLowerCase() === email);
+
+                if(jaExiste) {
+                    return alert("Este e-mail já está cadastrado! Use outro e-mail ou vá para a tela de login.");
+                }
+
+                const novoCliente = { 
+                    nome, 
+                    email, 
+                    senha, 
+                    endereco: `${endereco}, ${bairro} - ${cidade} (Ref: ${ref})`,
+                    desconto: 0 
+                };
+
                 const res = await fetch(`${URL_RENDER}/api/usuarios`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(novoCliente)
                 });
                 const r = await res.json();
-                if(r.sucesso) {
-                    alert("Cadastro salvo na nuvem com sucesso!");
+                
+                if(r.sucesso || res.ok) {
+                    alert("Cadastro salvo na nuvem com sucesso! Faça login agora.");
                     mostrarTela('tela-login');
                 } else {
-                    alert(r.erro || "Este e-mail já está cadastrado.");
+                    alert(r.erro || "Erro ao realizar cadastro.");
                 }
             } catch(e) {
-                alert("Erro ao salvar no Render.");
+                alert("Erro ao conectar com o servidor no Render.");
             }
         }
 
@@ -566,7 +579,7 @@
                 containerPed.innerHTML = pedidos.length === 0 ? '<p style="color:#636e72;">Nenhum pedido.</p>' : '';
 
                 pedidos.reverse().forEach(ped => {
-                    let itensTxt = ped.itens.map(i => `${i.qtd}x ${i.nome}`).join(', ');
+                    let itensTxt = Array.isArray(ped.itens) ? ped.itens.map(i => `${i.qtd}x ${i.nome}`).join(', ') : 'Detalhes indisponíveis';
                     let avisoPixCopiado = ped.pixCopiado ? '<p style="color: #e1b12c; font-weight: 700; font-size: 13px;">⚠️ Cliente copiou a chave Pix (Aguardando Confirmação)</p>' : '';
 
                     containerPed.innerHTML += `
@@ -582,7 +595,7 @@
                                 <button onclick="confirmarPixEPreparo(${ped.id})" style="background: #00b894; color: white; border: none; padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 700;">Pix Confirmado & Iniciar</button>
                                 <button onclick="atualizarStatusPedido(${ped.id}, 'Saiu para Entrega')" style="background: #e1b12c; color: white; border: none; padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 700;">Entrega</button>
                                 <button onclick="atualizarStatusPedido(${ped.id}, 'Concluído')" style="background: #0984e3; color: white; border: none; padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 700;">Concluir</button>
-                                <button onclick="excluirPedido(${ped.id})" style="background: #ffeaa7; color: #d63031; border: none; padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 700;">Excluir</button>
+                                <button onclick="excluirPedido(${ped.id})" style="background: #ffeaa7; color: #d63031; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 700;">Excluir</button>
                             </div>
                         </div>
                     `;
@@ -640,9 +653,19 @@
             await carregarPainelAdmin();
         }
 
+        // EXCLUSÃO CORRIGIDA DE PEDIDOS NA NUVEM
         async function excluirPedido(id) {
-            await fetch(`${URL_RENDER}/api/pedidos/${id}`, { method: 'DELETE' });
-            if(!document.getElementById('tela-admin').classList.contains('hidden')) carregarPainelAdmin();
+            if(!confirm("Tem certeza que deseja excluir este pedido?")) return;
+            try {
+                const res = await fetch(`${URL_RENDER}/api/pedidos/${id}`, { method: 'DELETE' });
+                if(res.ok) {
+                    carregarPainelAdmin();
+                } else {
+                    alert("Não foi possível excluir o pedido no servidor.");
+                }
+            } catch(e) {
+                alert("Erro de conexão ao tentar excluir o pedido.");
+            }
         }
 
         function adicionarAoCarrinho(id) {
@@ -670,11 +693,10 @@
             carregarChavePixSalva();
             window.pixCopiadoPeloUsuario = false;
 
-            // Busca dados atualizados do usuário para verificar se ganhou desconto do adm
             try {
                 const res = await fetch(`${URL_RENDER}/api/usuarios`);
                 const usuarios = await res.json();
-                const atual = usuarios.find(u => u.email === clienteLogado.email);
+                const atual = usuarios.find(u => u.email.toLowerCase() === clienteLogado.email.toLowerCase());
                 if(atual) clienteLogado = atual;
             } catch(e) {}
 
@@ -751,8 +773,7 @@
             });
 
             const r = await res.json();
-            if(r.sucesso) {
-                // Se usou o desconto, zera o desconto dele na nuvem após o pedido
+            if(res.ok || r.sucesso) {
                 if(desconto > 0) {
                     await fetch(`${URL_RENDER}/api/usuarios/${clienteLogado.id}/desconto`, {
                         method: 'PUT',
