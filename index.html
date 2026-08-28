@@ -127,14 +127,24 @@
                 <div id="lista-pedidos-admin"></div>
             </div>
 
-            <!-- SEÇÃO 3: CONFIG PIX ADMIN -->
+            <!-- SEÇÃO 3: CONFIG PIX ADMIN (Minimizável após salvar) -->
             <div id="secao-admin-config" class="hidden">
-                <h3 style="margin-bottom: 12px; font-size: 18px;">Configurar Chave Pix</h3>
-                <div style="background: white; padding: 18px; border-radius: 14px; border: 1px solid #f1f2f6;">
-                    <div class="form-group"><label>Sua Chave Pix</label><input type="text" id="adm-chave-pix" placeholder="Ex: (85) 99999-9999"></div>
+                <h3 style="margin-bottom: 12px; font-size: 18px;">Configurar Chave Pix da Loja</h3>
+                
+                <div id="form-pix-admin" style="background: white; padding: 18px; border-radius: 14px; border: 1px solid #f1f2f6;">
+                    <div class="form-group"><label>Chave Pix</label><input type="text" id="adm-chave-pix" placeholder="Ex: (85) 99999-9999"></div>
+                    <div class="form-group"><label>Nome Completo do Titular</label><input type="text" id="adm-nome-pix" placeholder="Ex: João da Silva"></div>
+                    <div class="form-group"><label>Banco</label><input type="text" id="adm-banco-pix" placeholder="Ex: Nubank, Caixa, Itaú"></div>
                     <button class="btn" onclick="salvarChavePix()">Salvar Chave Pix</button>
                 </div>
-                <div id="pix-salvo-info" style="margin-top: 12px; font-size: 14px; color: #00b894; font-weight: 700;"></div>
+
+                <div id="painel-pix-minimizado" class="hidden" style="background: white; padding: 16px; border-radius: 14px; border: 1px solid #f1f2f6;">
+                    <p style="color: #00b894; font-weight: 700; margin-bottom: 6px;">✓ Pix Cadastrado com Sucesso!</p>
+                    <p style="font-size: 14px; color: #636e72;"><b>Chave:</b> <span id="mini-chave"></span></p>
+                    <p style="font-size: 14px; color: #636e72;"><b>Titular:</b> <span id="mini-nome"></span></p>
+                    <p style="font-size: 14px; color: #636e72; margin-bottom: 12px;"><b>Banco:</b> <span id="mini-banco"></span></p>
+                    <button class="btn" style="background: #dfe6e9; color: #2d3436; margin-top: 0; padding: 10px; font-size: 14px;" onclick="editarChavePix()">Editar Chave Pix</button>
+                </div>
             </div>
 
             <button class="btn" style="background-color: #2d3436; margin-top: 30px;" onclick="sair()">Sair da Conta</button>
@@ -179,9 +189,11 @@
             </div>
 
             <div id="bloco-pix" class="hidden" style="background: #fff3f3; padding: 16px; border-radius: 12px; border: 1px dashed #ff4757; margin-bottom: 16px;">
-                <label style="color:#d63031;">Chave Pix do Estabelecimento:</label>
-                <p id="texto-chave-pix-exibida" style="font-weight: 700; font-size: 16px; margin: 8px 0; word-break: break-all;"></p>
-                <button type="button" class="btn" style="margin-top: 6px; padding: 10px; font-size: 14px;" onclick="copiarChavePix()">📋 Copiar Chave Pix</button>
+                <label style="color:#d63031; font-size: 15px;">Dados para Pagamento via Pix:</label>
+                <p style="font-size: 14px; margin-top: 6px;"><b>Chave:</b> <span id="exibe-chave"></span></p>
+                <p style="font-size: 14px;"><b>Titular:</b> <span id="exibe-nome"></span></p>
+                <p style="font-size: 14px; margin-bottom: 10px;"><b>Banco:</b> <span id="exibe-banco"></span></p>
+                <button type="button" class="btn" style="margin-top: 4px; padding: 12px; font-size: 15px;" onclick="copiarChavePix()">📋 Copiar Chave Pix</button>
             </div>
 
             <button class="btn" onclick="finalizarPedidoNoApp()">Confirmar Pedido</button>
@@ -256,6 +268,7 @@
             } else if(aba === 'config') {
                 document.getElementById('secao-admin-config').classList.remove('hidden');
                 document.getElementById('btn-aba-config').classList.add('ativo');
+                carregarChavePixSalva();
             }
         }
 
@@ -320,23 +333,51 @@
 
         function salvarChavePix() {
             const chave = document.getElementById('adm-chave-pix').value.trim();
-            if(!chave) return alert("Digite a chave Pix.");
+            const nome = document.getElementById('adm-nome-pix').value.trim();
+            const banco = document.getElementById('adm-banco-pix').value.trim();
+
+            if(!chave || !nome || !banco) return alert("Preencha todos os campos do Pix.");
+
             localStorage.setItem('delivery_chave_pix', chave);
-            document.getElementById('pix-salvo-info').innerText = "✓ Chave Pix salva com sucesso!";
-            setTimeout(() => { document.getElementById('pix-salvo-info').innerText = ""; }, 3000);
+            localStorage.setItem('delivery_nome_pix', nome);
+            localStorage.setItem('delivery_banco_pix', banco);
+
+            carregarChavePixSalva();
+            alert("Chave Pix salva com sucesso!");
         }
 
         function carregarChavePixSalva() {
-            const chave = localStorage.getItem('delivery_chave_pix') || "(Chave não cadastrada pelo admin)";
-            document.getElementById('adm-chave-pix').value = localStorage.getItem('delivery_chave_pix') || "";
-            document.getElementById('texto-chave-pix-exibida').innerText = chave;
+            const chave = localStorage.getItem('delivery_chave_pix');
+            const nome = localStorage.getItem('delivery_nome_pix');
+            const banco = localStorage.getItem('delivery_banco_pix');
+
+            if(chave && nome && banco) {
+                document.getElementById('form-pix-admin').classList.add('hidden');
+                document.getElementById('painel-pix-minimizado').classList.remove('hidden');
+                
+                document.getElementById('mini-chave').innerText = chave;
+                document.getElementById('mini-nome').innerText = nome;
+                document.getElementById('mini-banco').innerText = banco;
+
+                document.getElementById('exibe-chave').innerText = chave;
+                document.getElementById('exibe-nome').innerText = nome;
+                document.getElementById('exibe-banco').innerText = banco;
+            } else {
+                document.getElementById('form-pix-admin').classList.remove('hidden');
+                document.getElementById('painel-pix-minimizado').classList.add('hidden');
+            }
+        }
+
+        function editarChavePix() {
+            document.getElementById('form-pix-admin').classList.remove('hidden');
+            document.getElementById('painel-pix-minimizado').classList.add('hidden');
         }
 
         function copiarChavePix() {
             const chave = localStorage.getItem('delivery_chave_pix');
             if(!chave) return alert("Chave Pix não cadastrada.");
             navigator.clipboard.writeText(chave);
-            alert("Chave Pix copiada com sucesso! O status do seu pedido mudará para aguardando confirmação.");
+            alert("Chave Pix copiada! Faça o pagamento no seu banco e aguarde a confirmação da loja.");
             window.pixCopiadoPeloUsuario = true;
         }
 
@@ -381,7 +422,7 @@
                     let barraProgressoHTML = '';
                     if(ped.status === 'Em Preparo' && ped.minutosPreparo) {
                         barraProgressoHTML = `
-                            <p style="font-size: 13px; color: #636e72; margin-top: 4px;">Estimativa: <b id="timer-${ped.id}">${ped.minutosPreparo} minutos</b></p>
+                            <p style="font-size: 14px; color: #636e72; margin-top: 6px;">Tempo restante: <b id="timer-${ped.id}">${ped.minutosPreparo} minutos</b></p>
                             <div class="progress-bar-container"><div class="progress-bar-fill" id="bar-${ped.id}" style="width: 100%;"></div></div>
                         `;
                     }
@@ -437,7 +478,7 @@
 
                 pedidos.reverse().forEach(ped => {
                     let itensTxt = ped.itens.map(i => `${i.qtd}x ${i.nome}`).join(', ');
-                    let avisoPixCopiado = ped.pixCopiado ? '<p style="color: #e1b12c; font-weight: 700; font-size: 13px;">⚠️ Cliente copiou a chave Pix (Aguardando Confirmação)</p>' : '';
+                    let avisoPixCopiado = ped.pixCopiado ? '<p style="color: #e1b12c; font-weight: 700; font-size: 13px;">⚠️ Cliente copiou a chave Pix (Aguardando Confirmação do Pagamento)</p>' : '';
 
                     containerPed.innerHTML += `
                         <div class="pedido-card" style="border-left: 5px solid #ff4757;">
@@ -449,7 +490,7 @@
                             
                             <div style="display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; align-items: center;">
                                 <input type="number" id="tempo-${ped.id}" placeholder="Minutos" style="width: 90px; height: 38px; font-size: 14px; padding: 6px;">
-                                <button onclick="confirmarPixEPreparo(${ped.id})" style="background: #00b894; color: white; border: none; padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 700;">Confirmar Pix & Iniciar</button>
+                                <button onclick="confirmarPixEPreparo(${ped.id})" style="background: #00b894; color: white; border: none; padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 700;">Pix Confirmado & Iniciar</button>
                                 <button onclick="atualizarStatusPedido(${ped.id}, 'Saiu para Entrega')" style="background: #e1b12c; color: white; border: none; padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 700;">Entrega</button>
                                 <button onclick="atualizarStatusPedido(${ped.id}, 'Concluído')" style="background: #0984e3; color: white; border: none; padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 700;">Concluir</button>
                                 <button onclick="excluirPedido(${ped.id})" style="background: #ffeaa7; color: #d63031; border: none; padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 700;">Excluir</button>
@@ -581,7 +622,7 @@
                 pagamento: pagamento,
                 troco: troco || "Não precisa",
                 pixCopiado: window.pixCopiadoPeloUsuario || false,
-                status: pagamento === 'Pix' ? 'Aguardando Pagamento Pix' : 'Recebido'
+                status: pagamento === 'Pix' ? 'Aguardando Confirmação do Pix' : 'Recebido'
             };
 
             const res = await fetch(`${URL_RENDER}/api/pedidos`, {
