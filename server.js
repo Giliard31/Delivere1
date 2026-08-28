@@ -147,72 +147,42 @@ app.listen(PORT, () => {
 // ==========================================
 
 // Variável para guardar o Pix na memória do servidor
-const fs = require('fs');
-const path = require('path');
+// Variável global para armazenar a configuração do Pix na memória do servidor
+let configuracaoPix = {
+    chave: "",
+    nome: "",
+    banco: "",
+    cidade: "Brasil"
+};
 
-// Caminho do arquivo onde o Pix será salvo permanentemente no servidor
-const arquivoPixPath = path.join(__dirname, 'pix.json');
-
-// Função para ler a configuração do Pix salva no arquivo
-function lerConfigPix() {
-    try {
-        if (fs.existsSync(arquivoPixPath)) {
-            const dados = fs.readFileSync(arquivoPixPath, 'utf8');
-            return JSON.parse(dados);
-        }
-    } catch (e) {
-        console.error("Erro ao ler o arquivo Pix:", e);
-    }
-    // Retorno padrão caso o arquivo não exista
-    return { chave: "", nome: "", banco: "", cidade: "Brasil" };
-}
-
-// Função para salvar a configuração do Pix no arquivo
-function salvarConfigPix(config) {
-    try {
-        fs.writeFileSync(arquivoPixPath, JSON.stringify(config, null, 2), 'utf8');
-        return true;
-    } catch (e) {
-        console.error("Erro ao salvar o arquivo Pix:", e);
-        return false;
-    }
-}
-
-// 1. Rota para o Admin SALVAR a Chave Pix (agora salva em arquivo permanente)
+// Rota para o Admin SALVAR a Chave Pix
 app.post('/api/pix', (req, res) => {
     const { chave, nome, banco, cidade } = req.body;
     
-    const novaConfig = { 
+    configuracaoPix = { 
         chave: chave || "", 
         nome: nome || "Loja", 
         banco: banco || "", 
         cidade: cidade || "Brasil" 
     };
     
-    const salvo = salvarConfigPix(novaConfig);
-    
-    if (salvo) {
-        console.log("Chave Pix salva permanentemente:", novaConfig);
-        res.json({ sucesso: true });
-    } else {
-        res.status(500).json({ sucesso: false, erro: "Não foi possível salvar o arquivo Pix." });
-    }
+    console.log("Chave Pix salva na memória:", configuracaoPix);
+    res.json({ sucesso: true });
 });
 
-// 2. Rota para o Cliente ou Admin BUSCAR o Pix (lê do arquivo e gera o Payload com valor)
+// Rota para o Cliente ou Admin BUSCAR o Pix (com o valor da compra embutido)
 app.get('/api/pix', (req, res) => {
     const valorCompra = parseFloat(req.query.valor) || 0;
-    const configuracaoPix = lerConfigPix();
     
-    // Se a chave estiver vazia, retorna os dados vazios
+    // Se não houver chave cadastrada, retorna vazio
     if (!configuracaoPix.chave) {
-        return res.json({ chave: "", nome: "", banco: "", copiaECola: "" });
+        return res.json({ chave: "", nome: "", banco: "", cidade: "", copiaECola: "" });
     }
 
-    // Gera o código completo Copia e Cola com o valor exato da compra
+    // Gera o código Copia e Cola padrão do Banco Central com o valor
     const copiaEColaComValor = gerarPayloadPix(
         configuracaoPix.chave, 
-        configuraPixSegura(configuracaoPix.nome), 
+        configuracaoPix.nome || "Loja", 
         configuracaoPix.cidade || "Brasil", 
         valorCompra
     );
@@ -222,8 +192,3 @@ app.get('/api/pix', (req, res) => {
         copiaECola: copiaEColaComValor
     });
 });
-
-// Função auxiliar para evitar erros caso o nome venha vazio
-function configuraPixSegura(texto) {
-    return texto && texto.trim() !== "" ? texto : "Loja";
-}
