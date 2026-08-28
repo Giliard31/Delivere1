@@ -41,14 +41,20 @@
         
         .pedido-card, .cliente-card { flex-direction: column; align-items: stretch; gap: 8px; font-size: 15px; }
         
-        .progress-bar-container { background: #dfe6e9; border-radius: 8px; height: 10px; width: 100%; overflow: hidden; margin-top: 6px; }
+        /* ANIMAÇÃO DO MOTOBOY NA BARRA DE PROGRESSO */
+        .progress-wrapper { margin-top: 10px; position: relative; }
+        .motoboy-container { position: relative; width: 100%; height: 26px; margin-bottom: -4px; }
+        .motoboy-icon { position: absolute; font-size: 20px; transition: left 1s linear; transform: translateX(-50%); animation: bounceMoto 0.6s infinite alternate; }
+        @keyframes bounceMoto { from { transform: translateX(-50%) translateY(0); } to { transform: translateX(-50%) translateY(-3px); } }
+
+        .progress-bar-container { background: #dfe6e9; border-radius: 8px; height: 10px; width: 100%; overflow: hidden; }
         .progress-bar-fill { background: #00b894; height: 100%; width: 100%; transition: width 1s linear; }
 
         .carrinho-flutuante { position: fixed; bottom: 20px; left: 20px; right: 20px; background: #2d3436; color: white; padding: 16px 22px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 17px; cursor: pointer; box-shadow: 0 8px 24px rgba(0,0,0,0.2); z-index: 100; }
         
         #banner-instalacao { background: linear-gradient(135deg, #ff4757, #ff6b81); color: white; padding: 14px 18px; border-radius: 12px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(255,71,87,0.2); }
 
-        /* ESTILO DO MODAL DE ALERTA PERSONALIZADO (NO MEIO DA TELA) */
+        /* ESTILO DO MODAL DE ALERTA */
         #modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center; z-index: 9999; }
         .modal-box { background: white; width: 85%; max-width: 320px; padding: 24px; border-radius: 20px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); animation: scaleIn 0.2s ease-in-out; }
         @keyframes scaleIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
@@ -59,7 +65,6 @@
 </head>
 <body>
 
-    <!-- MODAL DE ALERTA (SUBSTITUI O ALERT DO NAVEGADOR) -->
     <div id="modal-overlay" class="hidden">
         <div class="modal-box">
             <h3 id="modal-titulo">Aviso</h3>
@@ -261,7 +266,6 @@
             }
         });
 
-        // FUNÇÃO DE ALERTA MODAL PERSONALIZADO (NO MEIO DA TELA)
         function mostrarAlerta(mensagem, titulo = "Aviso") {
             document.getElementById('modal-titulo').innerText = titulo;
             document.getElementById('modal-mensagem').innerText = mensagem;
@@ -547,15 +551,22 @@
                     let corStatus = ped.status === 'Concluído' ? '#00b894' : '#ff4757';
                     
                     let barraProgressoHTML = '';
-                    if(ped.status === 'Em Preparo' && ped.minutosPreparo && ped.tempoInicio) {
+                    if((ped.status === 'Em Preparo' || ped.status === 'Saiu para Entrega') && ped.minutosPreparo && ped.tempoInicio) {
                         let tempoTotalMs = ped.minutosPreparo * 60 * 1000;
                         let tempoDecorridoMs = Date.now() - ped.tempoInicio;
-                        let porcentagem = Math.max(0, 100 - (tempoDecorridoMs / tempoTotalMs) * 100);
+                        let porcentagem = Math.max(0, Math.min(100, 100 - (tempoDecorridoMs / tempoTotalMs) * 100));
                         let minutosRestantes = Math.max(0, Math.ceil((tempoTotalMs - tempoDecorridoMs) / (60 * 1000)));
+
+                        let iconeDeslocamento = porcentagem;
 
                         barraProgressoHTML = `
                             <p style="font-size: 14px; color: #636e72; margin-top: 6px;">Tempo restante: <b>${minutosRestantes} minutos</b></p>
-                            <div class="progress-bar-container"><div class="progress-bar-fill" style="width: ${porcentagem}%;"></div></div>
+                            <div class="progress-wrapper">
+                                <div class="motoboy-container">
+                                    <div class="motoboy-icon" style="left: ${iconeDeslocamento}%;">🛵</div>
+                                </div>
+                                <div class="progress-bar-container"><div class="progress-bar-fill" style="width: ${porcentagem}%;"></div></div>
+                            </div>
                         `;
                     }
 
@@ -686,8 +697,6 @@
         }
 
         async function excluirPedido(id) {
-            mostrarAlerta("Tem certeza que deseja excluir este pedido?", "Confirmação");
-            // Para manter simples, executamos direto após o clique
             try {
                 const res = await fetch(`${URL_RENDER}/api/pedidos/${id}`, { method: 'DELETE' });
                 if(res.ok) {
