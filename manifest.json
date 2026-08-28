@@ -1,7 +1,8 @@
 {
   "name": "Delivery Express",
   "short_name": "Delivery",
-  "start_url": "/",
+  "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#ff4757",
